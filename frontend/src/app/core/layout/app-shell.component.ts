@@ -15,23 +15,23 @@ import { ThemeService } from '../services/theme.service';
 
     <div class="min-h-screen flex flex-col lg:flex-row bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
       <!-- Desktop Sidebar -->
-      <aside class="hidden lg:flex lg:flex-col lg:w-64 lg:shrink-0 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-        <div class="h-16 px-6 flex items-center gap-3 border-b border-slate-200 dark:border-slate-800">
-          <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+      <aside class="hidden lg:flex lg:flex-col lg:w-68 lg:shrink-0 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+        <div class="h-18 px-6 flex items-center gap-3.5 border-b border-slate-200 dark:border-slate-800">
+          <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-extrabold text-xl shadow-sm">
             L
           </div>
           <div>
-            <span class="font-bold text-lg tracking-tight">Lumo</span>
-            <p class="text-xs text-slate-500 dark:text-slate-400 leading-none">Controle Financeiro</p>
+            <span class="font-extrabold text-xl tracking-tight">Lumo</span>
+            <p class="text-xs font-medium text-slate-500 dark:text-slate-400 leading-none mt-0.5">Controle Financeiro</p>
           </div>
         </div>
 
-        <nav class="flex-1 p-4 flex flex-col gap-1" aria-label="Navegação principal">
+        <nav class="flex-1 p-4 flex flex-col gap-1.5" aria-label="Navegação principal">
           @for (item of navItems; track item.route) {
             <a
               [routerLink]="item.route"
-              routerLinkActive="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 font-semibold"
-              class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              routerLinkActive="bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 font-semibold"
+              class="flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors"
             >
               <i [class]="item.icon + ' text-base'"></i>
               <span>{{ item.label }}</span>
@@ -44,10 +44,10 @@ import { ThemeService } from '../services/theme.service';
             type="button"
             data-testid="theme-toggle-desktop"
             (click)="themeService.toggle()"
-            class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            class="w-full flex items-center justify-between px-4 py-3 rounded-xl text-[15px] text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors cursor-pointer"
             [attr.aria-label]="themeService.isDark() ? 'Ativar modo claro' : 'Ativar modo escuro'"
           >
-            <span class="flex items-center gap-2.5">
+            <span class="flex items-center gap-3">
               <i [class]="themeService.isDark() ? 'pi pi-sun text-amber-400' : 'pi pi-moon text-indigo-500'"></i>
               <span>{{ themeService.isDark() ? 'Modo Claro' : 'Modo Escuro' }}</span>
             </span>
@@ -56,7 +56,7 @@ import { ThemeService } from '../services/theme.service';
       </aside>
 
       <!-- Mobile Top Bar -->
-      <header class="lg:hidden sticky top-0 z-30 h-14 px-4 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur">
+      <header class="lg:hidden sticky top-0 z-30 h-15 px-4 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur">
         <div class="flex items-center gap-3">
           <button
             type="button"
@@ -67,8 +67,8 @@ import { ThemeService } from '../services/theme.service';
           >
             <i class="pi pi-bars text-lg"></i>
           </button>
-          <a routerLink="/budgets" class="flex items-center gap-2 font-bold text-base">
-            <span class="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-sm">L</span>
+          <a routerLink="/dashboard" class="flex items-center gap-2.5 font-extrabold text-lg">
+            <span class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-sm font-extrabold">L</span>
             <span>Lumo</span>
           </a>
         </div>
@@ -92,9 +92,9 @@ import { ThemeService } from '../services/theme.service';
             (click)="mobileMenuOpen.set(false)"
             aria-hidden="true"
           ></div>
-          <nav class="relative z-50 w-64 max-w-[80vw] bg-white dark:bg-slate-900 h-full p-4 flex flex-col gap-1 shadow-xl">
+          <nav class="relative z-50 w-68 max-w-[82vw] bg-white dark:bg-slate-900 h-full p-4 flex flex-col gap-1.5 shadow-xl">
             <div class="flex items-center justify-between pb-4 mb-2 border-b border-slate-200 dark:border-slate-800">
-              <span class="font-bold text-lg">Lumo</span>
+              <span class="font-extrabold text-xl">Lumo</span>
               <button
                 type="button"
                 (click)="mobileMenuOpen.set(false)"
@@ -107,9 +107,9 @@ import { ThemeService } from '../services/theme.service';
             @for (item of navItems; track item.route) {
               <a
                 [routerLink]="item.route"
-                routerLinkActive="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 font-semibold"
+                routerLinkActive="bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 font-semibold"
                 (click)="mobileMenuOpen.set(false)"
-                class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80"
               >
                 <i [class]="item.icon + ' text-base'"></i>
                 <span>{{ item.label }}</span>
@@ -120,7 +120,7 @@ import { ThemeService } from '../services/theme.service';
       }
 
       <!-- Main Content -->
-      <main class="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+      <main class="flex-1 min-w-0 w-full p-5 sm:p-6 lg:px-10 lg:py-8">
         <router-outlet />
       </main>
     </div>
@@ -131,6 +131,7 @@ export class AppShellComponent {
   readonly mobileMenuOpen = signal(false);
 
   readonly navItems = [
+    { label: 'Dashboard', route: '/dashboard', icon: 'pi pi-chart-pie' },
     { label: 'Orçamentos', route: '/budgets', icon: 'pi pi-wallet' },
     { label: 'Recorrências', route: '/recurrences', icon: 'pi pi-sync' },
     { label: 'Cadastros', route: '/catalog', icon: 'pi pi-tags' },

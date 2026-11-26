@@ -114,12 +114,12 @@ T7 → T8 → T9 → T10
 **Requirement**: UI-01, UI-02, DASH-01
 
 **Done when**:
-- [ ] `<main>` uses `flex-1 min-w-0 w-full p-5 sm:p-6 lg:px-10 lg:py-8` without `max-w-7xl`
-- [ ] `navItems` lists `Dashboard` (`/dashboard`), `Orçamentos` (`/budgets`), `Recorrências` (`/recurrences`), and `Cadastros` (`/catalog`)
-- [ ] Sidebar brand emblem, active link states, and mobile drawer use Royal Indigo (`indigo-600` / `indigo-50` / `dark:indigo-950/60`) with `15px–16px` nav links
-- [ ] Unit tests verify navigation items, full-width `<main>` classes, and zero `emerald-*` classes
-- [ ] Gate check passes: `cd frontend && npm test -- --watch=false`
-- [ ] Test count: >= 18 unit tests pass
+- [x] `<main>` uses `flex-1 min-w-0 w-full p-5 sm:p-6 lg:px-10 lg:py-8` without `max-w-7xl`
+- [x] `navItems` lists `Dashboard` (`/dashboard`), `Orçamentos` (`/budgets`), `Recorrências` (`/recurrences`), and `Cadastros` (`/catalog`)
+- [x] Sidebar brand emblem, active link states, and mobile drawer use Royal Indigo (`indigo-600` / `indigo-50` / `dark:indigo-950/60`) with `15px–16px` nav links
+- [x] Unit tests verify navigation items, full-width `<main>` classes, and zero `emerald-*` classes
+- [x] Gate check passes: `cd frontend && npm test -- --watch=false`
+- [x] Test count: >= 18 unit tests pass
 
 **Tests**: unit
 **Gate**: quick
