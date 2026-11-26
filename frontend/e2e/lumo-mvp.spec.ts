@@ -58,6 +58,29 @@ test.describe('Lumo MVP Full-Stack E2E', () => {
     expect(consoleErrors, 'Zero console errors').toEqual([]);
   });
 
+  test('dashboard default route and navigation, dashboard and typography scale', async ({ page }) => {
+    await page.goto('/');
+    await expect(page).toHaveURL(/\/dashboard$/);
+    await expect(page.getByTestId('dashboard-empty-state')).toBeVisible();
+
+    const mainClass = await page.locator('main').getAttribute('class');
+    expect(mainClass).toContain('w-full');
+    expect(mainClass).not.toContain('max-w-7xl');
+
+    const bodyStyle = await page.evaluate(() => {
+      const style = window.getComputedStyle(document.body);
+      return { fontSize: style.fontSize, fontFamily: style.fontFamily };
+    });
+    expect(bodyStyle.fontSize).toBe('16px');
+    expect(bodyStyle.fontFamily).toContain('Plus Jakarta Sans');
+
+    const bodyHtml = await page.locator('body').innerHTML();
+    expect(bodyHtml).not.toContain('emerald-');
+
+    await page.getByTestId('dashboard-empty-create-btn').click();
+    await expect(page).toHaveURL(/\/budgets$/);
+  });
+
   test('budgets list and create flow', async ({ page }) => {
     await page.goto('/budgets');
     await expect(page.getByTestId('budgets-empty-state')).toBeVisible();
@@ -85,7 +108,7 @@ test.describe('Lumo MVP Full-Stack E2E', () => {
     await expect(page.getByText(catName)).toBeVisible();
 
     await page.getByTestId('tab-beneficiaries').click();
-    await expect(page.getByText('Família')).toBeVisible();
+    await expect(page.getByText('Família', { exact: true })).toBeVisible();
 
     await page.getByTestId('new-beneficiary-btn').click();
     await page.locator('#ben-name').fill(benName);
@@ -183,10 +206,24 @@ test.describe('Lumo MVP Full-Stack E2E', () => {
     await expect(page.getByTestId('summary-planned-expense')).toContainText('980,00');
     await expect(page.getByTestId('summary-realized-expense')).toContainText('0,00');
 
+    // Charts must NOT be embedded in /budgets/:id; shortcut to /dashboard must be visible
+    await expect(page.getByTestId('budget-charts')).toHaveCount(0);
+    await expect(page.getByTestId('open-dashboard-charts-btn')).toBeVisible();
+
     // 1-click settle on Aluguel E2E (works on both desktop table & mobile card)
     const isDesktop = (page.viewportSize()?.width ?? 1440) >= 1024;
     if (isDesktop) {
-      await page.getByTestId('toggle-status-Aluguel E2E').click();
+      const statusHeader = page.getByTestId('status-column-header');
+      await expect(statusHeader).toBeVisible();
+      await expect(statusHeader).toHaveText('Status');
+      await expect(statusHeader).toHaveAttribute(
+        'data-tooltip',
+        /Clique no status de qualquer lançamento para alternar/
+      );
+
+      const toggleBtn = page.getByTestId('toggle-status-Aluguel E2E');
+      await expect(toggleBtn).toHaveAttribute('data-tooltip', 'Clique para marcar como Pago');
+      await toggleBtn.click();
     } else {
       await page
         .getByTestId('transactions-mobile-cards')
@@ -197,6 +234,12 @@ test.describe('Lumo MVP Full-Stack E2E', () => {
     }
 
     await expect(page.getByTestId('summary-realized-expense')).toContainText('800,00');
+    if (isDesktop) {
+      await expect(page.getByTestId('toggle-status-Aluguel E2E')).toHaveAttribute(
+        'data-tooltip',
+        'Clique para reverter para Pendente'
+      );
+    }
 
     // Confirm estimate on Água E2E
     if (isDesktop) {
@@ -216,7 +259,23 @@ test.describe('Lumo MVP Full-Stack E2E', () => {
     await expect(page.getByTestId('summary-planned-expense')).toContainText('995,64');
   });
 
-  test('charts and dark mode persistence', async ({ page, request }) => {
+  test('dashboard multi-color charts and dark mode persistence', async ({ page, request }) => {
+    const octBudgetRes = await request.post(`${API_BASE}/budgets`, {
+      data: { competenceMonth: '2026-10' },
+    });
+    const octBudget: { id: string } = await octBudgetRes.json();
+
+    await request.post(`${API_BASE}/budgets/${octBudget.id}/transactions`, {
+      data: {
+        type: 'INCOME',
+        description: 'Salário Outubro',
+        amount: 6000.0,
+        status: 'SETTLED',
+        categoryId: '10000000-0000-0000-0000-000000000010',
+        beneficiaryId: '20000000-0000-0000-0000-000000000001',
+      },
+    });
+
     const budgetRes = await request.post(`${API_BASE}/budgets`, {
       data: { competenceMonth: '2026-11' },
     });
@@ -224,19 +283,45 @@ test.describe('Lumo MVP Full-Stack E2E', () => {
 
     await request.post(`${API_BASE}/budgets/${budget.id}/transactions`, {
       data: {
+        type: 'INCOME',
+        description: 'Salário Novembro',
+        amount: 7000.0,
+        status: 'SETTLED',
+        categoryId: '10000000-0000-0000-0000-000000000010',
+        beneficiaryId: '20000000-0000-0000-0000-000000000001',
+      },
+    });
+
+    await request.post(`${API_BASE}/budgets/${budget.id}/transactions`, {
+      data: {
         type: 'EXPENSE',
         description: 'Aluguel Chart',
-        amount: 800.0,
+        amount: 1200.0,
         status: 'SETTLED',
         categoryId: '10000000-0000-0000-0000-000000000001',
         beneficiaryId: '20000000-0000-0000-0000-000000000001',
       },
     });
 
-    await page.goto(`/budgets/${budget.id}`);
-    await expect(page.getByTestId('budget-charts')).toBeVisible();
+    await request.post(`${API_BASE}/budgets/${budget.id}/transactions`, {
+      data: {
+        type: 'EXPENSE',
+        description: 'Energia Chart',
+        amount: 400.0,
+        status: 'ESTIMATED',
+        categoryId: '10000000-0000-0000-0000-000000000002',
+        beneficiaryId: '20000000-0000-0000-0000-000000000001',
+      },
+    });
+
+    await page.goto('/dashboard');
+    await expect(page.getByTestId('dashboard-kpi-cards')).toBeVisible();
     await expect(page.getByTestId('chart-category')).toBeVisible();
     await expect(page.getByTestId('chart-beneficiary')).toBeVisible();
+    await expect(page.getByTestId('chart-status')).toBeVisible();
+    await expect(page.getByTestId('chart-evolution')).toBeVisible();
+    await expect(page.getByTestId('category-breakdown-list')).toContainText('75%');
+    await expect(page.getByTestId('category-breakdown-list')).toContainText('25%');
 
     const isDesktop = (page.viewportSize()?.width ?? 1440) >= 1024;
     const toggleBtn = page.getByTestId(isDesktop ? 'theme-toggle-desktop' : 'theme-toggle-mobile');
@@ -245,5 +330,7 @@ test.describe('Lumo MVP Full-Stack E2E', () => {
     await expect(page.locator('html')).toHaveClass(/dark/);
     await page.reload();
     await expect(page.locator('html')).toHaveClass(/dark/);
+    await expect(page.getByTestId('chart-category')).toBeVisible();
+    await expect(page.getByTestId('chart-evolution')).toBeVisible();
   });
 });

@@ -262,11 +262,11 @@ T7 → T8 → T9 → T10
 **Requirement**: UI-01, UI-02, DASH-01, DASH-02, BUD-02
 
 **Done when**:
-- [ ] E2E suite verifies `/` redirects to `/dashboard` and renders multi-color Category, Beneficiary, Status, and Evolution charts
-- [ ] E2E suite verifies `/budgets/:id` has no embedded charts and renders the `"Status"` header with tooltip and 1-click toggle
-- [ ] Desktop (`1440x900`) and mobile (`390x844`) tests pass with zero console/page errors
-- [ ] Gate check passes: `cd frontend && npx playwright test --reporter=list`
-- [ ] Test count: >= 10 E2E scenarios pass
+- [x] E2E suite verifies `/` redirects to `/dashboard` and renders multi-color Category, Beneficiary, Status, and Evolution charts
+- [x] E2E suite verifies `/budgets/:id` has no embedded charts and renders the `"Status"` header with tooltip and 1-click toggle
+- [x] Desktop (`1440x900`) and mobile (`390x844`) tests pass with zero console/page errors
+- [x] Gate check passes: `cd frontend && npx playwright test --reporter=list`
+- [x] Test count: >= 10 E2E scenarios pass
 
 **Tests**: e2e
 **Gate**: full
@@ -331,8 +331,8 @@ Proof: run e2e | budget detail settle and confirm estimate
 The feature's live state, written as it happens - a compaction gives no warning.
 
 **Settled mid-build:** none
-**Dispatched:** batch-1 (Phases 1-2: T1..T7) returned; batch-2 (Phase 3: T8..T10) at HEAD 8e8c6ec
-**Walked:** none
+**Dispatched:** batch-1 (Phases 1-2: T1..T7) returned; batch-2 (Phase 3: T8..T10) returned; Verifier at HEAD
+**Walked:** P1 Royal Indigo & Sapphire Blue palette, Plus Jakarta Sans & JetBrains Mono typography, full-width `<main>` (`w-full`, no `max-w-7xl`), and Dark Mode persistence verified on `http://localhost:4200` at `1440x900` and `390x844`; P1 `/dashboard` default route verified with competence month selector, executive KPIs, 4 multi-color charts (Categorias, Beneficiários, Status de Liquidação, Evolução Mensal) and shortcut to `/budgets/:id`; P1 `/budgets/:id` verified without embedded charts, with `"Status"` header tooltip (`[data-testid="status-column-header"]`), row status tooltips, and 1-click toggle with 0 console errors.
 
 ---
 

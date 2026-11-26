@@ -9,11 +9,11 @@ A interface atual do Lumo utiliza uma paleta monocromática dominada por verde (
 
 ## Goals
 
-- [ ] Substituir completamente o esquema de cores verde por uma paleta **Royal Indigo & Azul Safira (Estilo Stripe/Linear)**, usando Indigo (`#4F46E5`) para identidade/controles, Azul Safira (`#0284C7`) para receitas/saldos positivos/itens liquidados, Coral/Rose (`#E11D48`) para despesas/saldos negativos e Âmbar (`#D97706`) para estimativas, com suporte completo a Light e Dark Mode.
-- [ ] Ampliar a escala tipográfica global adotando **Plus Jakarta Sans** e **JetBrains Mono** (`tabular-nums`), elevando textos de tabela e controles para `15px–16px` e eliminando micro-fontes de difícil leitura.
-- [ ] Aproveitar 100% da largura útil da tela (`w-full` ao lado da sidebar, removendo `max-w-7xl`) em todas as páginas da aplicação.
-- [ ] Criar a página dedicada de **Dashboard (`/dashboard`)** como rota inicial e primeiro item do menu lateral, contendo seletor de mês, atalho para os lançamentos do orçamento, KPIs executivos, gráficos multicoloridos (Categorias, Beneficiários, Status de Liquidação) e gráfico de Evolução Mensal entre orçamentos.
-- [ ] Remover os gráficos da página de detalhe do orçamento mensal (`/budgets/:id`) e limpar o cabeçalho `"Status (1-clique)"` para `"Status"` com ícone informativo e tooltip PrimeNG (`pTooltip`).
+- [x] Substituir completamente o esquema de cores verde por uma paleta **Royal Indigo & Azul Safira (Estilo Stripe/Linear)**, usando Indigo (`#4F46E5`) para identidade/controles, Azul Safira (`#0284C7`) para receitas/saldos positivos/itens liquidados, Coral/Rose (`#E11D48`) para despesas/saldos negativos e Âmbar (`#D97706`) para estimativas, com suporte completo a Light e Dark Mode.
+- [x] Ampliar a escala tipográfica global adotando **Plus Jakarta Sans** e **JetBrains Mono** (`tabular-nums`), elevando textos de tabela e controles para `15px–16px` e eliminando micro-fontes de difícil leitura.
+- [x] Aproveitar 100% da largura útil da tela (`w-full` ao lado da sidebar, removendo `max-w-7xl`) em todas as páginas da aplicação.
+- [x] Criar a página dedicada de **Dashboard (`/dashboard`)** como rota inicial e primeiro item do menu lateral, contendo seletor de mês, atalho para os lançamentos do orçamento, KPIs executivos, gráficos multicoloridos (Categorias, Beneficiários, Status de Liquidação) e gráfico de Evolução Mensal entre orçamentos.
+- [x] Remover os gráficos da página de detalhe do orçamento mensal (`/budgets/:id`) e limpar o cabeçalho `"Status (1-clique)"` para `"Status"` com ícone informativo e tooltip PrimeNG (`pTooltip`).
 
 ## Out of Scope
 
@@ -147,8 +147,8 @@ Every ambiguity is resolved or recorded here.
 
 ## Success Criteria
 
-- [ ] Zero uso de verde esmeralda (`emerald-*`) na interface, substituído pela paleta **Royal Indigo (`#4F46E5`) & Azul Safira (`#0284C7`)** tanto no modo Claro quanto no Escuro.
-- [ ] Fonte base ampliada (`Plus Jakarta Sans` + `JetBrains Mono`) e layout ocupando 100% da largura disponível (`w-full`) em todas as páginas.
-- [ ] Nova página `/dashboard` funcionando como rota inicial com seletor de mês, gráficos multicoloridos (Categorias, Beneficiários, Status) e Evolução Mensal.
-- [ ] Página `/budgets/:id` limpa (sem gráficos embutidos) e com coluna `"Status"` dotada de `pTooltip` explicativo.
-- [ ] Todos os testes unitários (Vitest), build Angular, lint, SonarQube Quality Gate e testes E2E Playwright (desktop e mobile) passando com zero erros no console.
+- [x] Zero uso de verde esmeralda (`emerald-*`) na interface, substituído pela paleta **Royal Indigo (`#4F46E5`) & Azul Safira (`#0284C7`)** tanto no modo Claro quanto no Escuro.
+- [x] Fonte base ampliada (`Plus Jakarta Sans` + `JetBrains Mono`) e layout ocupando 100% da largura disponível (`w-full`) em todas as páginas.
+- [x] Nova página `/dashboard` funcionando como rota inicial com seletor de mês, gráficos multicoloridos (Categorias, Beneficiários, Status) e Evolução Mensal.
+- [x] Página `/budgets/:id` limpa (sem gráficos embutidos) e com coluna `"Status"` dotada de `pTooltip` explicativo.
+- [x] Todos os testes unitários (Vitest), build Angular, lint, SonarQube Quality Gate e testes E2E Playwright (desktop e mobile) passando com zero erros no console.
