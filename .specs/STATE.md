@@ -66,13 +66,21 @@
 - **Date**: 2026-11-26
 - **Status**: active
 
+### AD-009
+- **Decision**: Adotar a identidade visual **Royal Indigo (`#4F46E5`) & Azul Safira (`#0284C7`)** (100% sem verde) com preset PrimeNG Aura customizado para `indigo`, tipografia ampliada (**Plus Jakarta Sans** + **JetBrains Mono** com `15px–16px` nas tabelas e `30px–36px` nos KPIs), layout fluido em tela cheia (`w-full` sem `max-w-7xl`), cabeçalho `"Status"` com `pTooltip` no orçamento mensal e página dedicada de **Dashboard (`/dashboard`)** como rota padrão com gráficos multicoloridos e evolução mensal.
+- **Reason**: Eliminar a aparência monocromática esverdeada, melhorar a legibilidade e o aproveitamento de monitores largos, e separar a visualização analítica (`/dashboard`) da operação diária de lançamentos (`/budgets/:id`).
+- **Trade-off**: Requer resolvedor de paleta categórica no frontend para substituir cores legadas verdes/duplicadas nos gráficos mantendo compatibilidade com dados existentes no banco.
+- **Scope**: `frontend/`.
+- **Date**: 2026-11-26
+- **Status**: active
+
 ## Handoff
 
-- **Feature**: `01-lumo-mvp`
-- **Phase / Task**: Implemented & Verified (T1..T32 concluídas) — aguardando aprovação explícita do usuário antes de commit/push
-- **Completed**: Backend Java 25 + Quarkus 3.33.4.2 (83 testes unitários/ArchUnit + 17 testes de integração Testcontainers PostgreSQL), Frontend Angular v22 + Tailwind CSS v4 + PrimeNG v22 + Chart.js (lint OK, build OK, 17 testes unitários Vitest), E2E Playwright (10/10 cenários desktop + mobile sem erros de console) e sincronização de `README.md` + `docs/`
+- **Feature**: `02-ui-ux-overhaul`
+- **Phase / Task**: Spec & Tasks Approved — pronto para iniciar implementação (`T1..T10` pendentes em `.specs/features/02-ui-ux-overhaul/tasks.md`)
+- **Completed**: `01-lumo-mvp` implementado e verificado; `02-ui-ux-overhaul` especificado (`context.md`, `spec.md`, `design.md`, `tasks.md`) e aprovado pelo usuário
 - **In-progress** (file:line): none
-- **Next step**: Aguardar aprovação do usuário para realizar `git add`, `git commit` (Angular Conventional Commits) e `git push`
-- **Blockers**: none (SonarQube Quality Gate `OK` para `lumo-backend` e `lumo-frontend`, lint OK)
+- **Next step**: Executar `/implement-spec-tasks 02-ui-ux-overhaul` (ou `/implement-spec-tasks`) em uma nova sessão para implementar e verificar `T1..T10`
+- **Blockers**: none
 - **Uncommitted files**: `backend/`, `frontend/`, `docker-compose.yml`, `README.md`, `AGENTS.md`, `docs/`, `sonar-project.properties`, `.gitignore`, `.specs/`
 - **Branch**: main

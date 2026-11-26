@@ -5,20 +5,31 @@
 
 :root {
   color-scheme: light;
+  --lumo-font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --lumo-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
 :root.dark {
   color-scheme: dark;
 }
 
-html,
+html {
+  height: 100%;
+  font-size: 16px;
+}
+
 body {
   height: 100%;
   margin: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--lumo-font-sans);
+  font-size: 1rem;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+.font-mono,
 .tabular-nums {
+  font-family: var(--lumo-font-mono);
   font-variant-numeric: tabular-nums;
 }
