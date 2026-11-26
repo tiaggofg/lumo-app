@@ -1,0 +1,20 @@
+# Backend / Maven / Java
+backend/target/
+*.log
+
+# Frontend / Node / Angular / Playwright
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/coverage/
+frontend/playwright-report/
+frontend/test-results/
+
+# SonarQube / Scanner
+.scannerwork/
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
