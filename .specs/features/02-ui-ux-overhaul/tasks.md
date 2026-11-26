@@ -178,12 +178,12 @@ T7 → T8 → T9 → T10
 **Requirement**: DASH-01, DASH-02
 
 **Done when**:
-- [ ] `DashboardPageComponent` renders a guided empty state with link to `/budgets` when no monthly budget exists
-- [ ] When budgets exist, selects the latest budget (or query param `budgetId`), displays executive KPIs (`text-3xl font-extrabold tabular-nums`), month selector, and `"Ver lançamentos do mês"` button
-- [ ] Renders 4 multi-color analytical panels: Despesas por Categoria (`chart-category` + ranked `%` list), Despesas por Beneficiário (`chart-beneficiary` with distinct colors per beneficiary), Status de Liquidação (`chart-status`), and Evolução Mensal (`chart-evolution` ordered `competenceMonth ASC`)
-- [ ] Unit tests in `dashboard-page.component.spec.ts` verify empty state, selected budget KPIs, and chronological evolution data sorting
-- [ ] Gate check passes: `cd frontend && npm test -- --watch=false`
-- [ ] Test count: >= 24 unit tests pass
+- [x] `DashboardPageComponent` renders a guided empty state with link to `/budgets` when no monthly budget exists
+- [x] When budgets exist, selects the latest budget (or query param `budgetId`), displays executive KPIs (`text-3xl font-extrabold tabular-nums`), month selector, and `"Ver lançamentos do mês"` button
+- [x] Renders 4 multi-color analytical panels: Despesas por Categoria (`chart-category` + ranked `%` list), Despesas por Beneficiário (`chart-beneficiary` with distinct colors per beneficiary), Status de Liquidação (`chart-status`), and Evolução Mensal (`chart-evolution` ordered `competenceMonth ASC`)
+- [x] Unit tests in `dashboard-page.component.spec.ts` verify empty state, selected budget KPIs, and chronological evolution data sorting
+- [x] Gate check passes: `cd frontend && npm test -- --watch=false`
+- [x] Test count: >= 24 unit tests pass
 
 **Tests**: unit
 **Gate**: quick
