@@ -11,9 +11,17 @@ Aplicação web full-stack para controle financeiro mensal pessoal e familiar, s
 
 ## Como Executar Localmente
 
+### Opção 1 — Stack completa via Docker Compose (PostgreSQL + Backend + Frontend)
 ```bash
-# 1. Subir PostgreSQL 17
-docker compose up -d
+docker compose up -d --build
+# Acesse: http://localhost:4200 (ou defina LUMO_FRONTEND_PORT=4201 se a 4200 estiver ocupada)
+# API / Swagger UI: http://localhost:8080/q/swagger-ui
+```
+
+### Opção 2 — Modo desenvolvimento (live reload)
+```bash
+# 1. Subir apenas o PostgreSQL 17
+docker compose up -d postgres
 
 # 2. Executar o backend (porta 8080, Swagger UI em /q/swagger-ui)
 cd backend && ./mvnw quarkus:dev
