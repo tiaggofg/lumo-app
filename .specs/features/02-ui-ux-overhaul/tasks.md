@@ -242,10 +242,10 @@ T7 → T8 → T9 → T10
 **Requirement**: UI-01, UI-02
 
 **Done when**:
-- [ ] Zero `emerald-*` classes remain across `frontend/src/app/`
-- [ ] `BudgetListPageComponent`, `RecurrencesPageComponent`, and `CatalogPageComponent` use enlarged typography (`text-3xl` page headers, `text-xl` card headers, `text-base` body/controls) and full-width responsive grids
-- [ ] Gate check passes: `cd frontend && npm test -- --watch=false && npm run lint && npm run build`
-- [ ] Test count: >= 26 unit tests pass
+- [x] Zero `emerald-*` classes remain across `frontend/src/app/`
+- [x] `BudgetListPageComponent`, `RecurrencesPageComponent`, and `CatalogPageComponent` use enlarged typography (`text-3xl` page headers, `text-xl` card headers, `text-base` body/controls) and full-width responsive grids
+- [x] Gate check passes: `cd frontend && npm test -- --watch=false && npm run lint && npm run build`
+- [x] Test count: >= 26 unit tests pass
 
 **Tests**: unit
 **Gate**: quick

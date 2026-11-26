@@ -17,8 +17,8 @@ import { CatalogStoreService } from './catalog-store.service';
     <div class="space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold tracking-tight">Cadastros</h1>
-          <p class="text-sm text-slate-500 dark:text-slate-400">
+          <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Cadastros</h1>
+          <p class="text-[15px] text-slate-500 dark:text-slate-400 mt-1">
             Gerencie categorias de receitas e despesas e beneficiários da família.
           </p>
         </div>
@@ -50,10 +50,10 @@ import { CatalogStoreService } from './catalog-store.service';
           (click)="activeTab.set('categories')"
           [class]="
             activeTab() === 'categories'
-              ? 'border-b-2 border-emerald-600 text-emerald-600 dark:text-emerald-400 font-semibold'
-              : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+              ? 'border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400 font-semibold'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 font-medium'
           "
-          class="px-4 py-2.5 text-sm transition-colors cursor-pointer"
+          class="px-4 py-3 text-[15px] transition-colors cursor-pointer"
         >
           Categorias ({{ store.categories().length }})
         </button>
@@ -63,10 +63,10 @@ import { CatalogStoreService } from './catalog-store.service';
           (click)="activeTab.set('beneficiaries')"
           [class]="
             activeTab() === 'beneficiaries'
-              ? 'border-b-2 border-emerald-600 text-emerald-600 dark:text-emerald-400 font-semibold'
-              : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+              ? 'border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400 font-semibold'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 font-medium'
           "
-          class="px-4 py-2.5 text-sm transition-colors cursor-pointer"
+          class="px-4 py-3 text-[15px] transition-colors cursor-pointer"
         >
           Beneficiários ({{ store.beneficiaries().length }})
         </button>
@@ -82,39 +82,39 @@ import { CatalogStoreService } from './catalog-store.service';
                 (click)="categoryTypeFilter.set(filter.value)"
                 [class]="
                   categoryTypeFilter() === filter.value
-                    ? 'bg-emerald-600 text-white'
-                    : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800'
+                    ? 'bg-indigo-600 text-white font-semibold shadow-xs'
+                    : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 font-medium'
                 "
-                class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer"
+                class="px-3.5 py-2 rounded-xl text-sm transition-colors cursor-pointer"
               >
                 {{ filter.label }}
               </button>
             }
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
             @for (cat of filteredCategories(); track cat.id) {
               <div
-                class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3"
+                class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shadow-xs"
                 [class.opacity-60]="!cat.active"
               >
-                <div class="flex items-center gap-3 min-w-0">
+                <div class="flex items-center gap-3.5 min-w-0">
                   <span
-                    class="w-9 h-9 rounded-lg flex items-center justify-center text-white shrink-0"
-                    [style.background-color]="cat.color || '#64748B'"
+                    class="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0"
+                    [style.background-color]="cat.color || '#4F46E5'"
                   >
                     <i [class]="cat.icon || 'pi pi-tag'"></i>
                   </span>
                   <div class="min-w-0">
-                    <div class="font-medium text-sm truncate">{{ cat.name }}</div>
+                    <div class="font-semibold text-[15px] truncate">{{ cat.name }}</div>
                     <div class="flex items-center gap-1.5 mt-0.5">
                       <span class="text-xs text-slate-500 dark:text-slate-400">
                         {{ cat.type === 'EXPENSE' ? 'Despesa' : 'Receita' }}
                       </span>
                       <span class="text-slate-300 dark:text-slate-700">•</span>
                       <span
-                        class="text-xs font-medium"
-                        [class]="cat.active ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'"
+                        class="text-xs font-semibold"
+                        [class]="cat.active ? 'text-sky-600 dark:text-sky-400' : 'text-slate-400'"
                       >
                         {{ cat.active ? 'Ativa' : 'Inativa' }}
                       </span>
@@ -130,7 +130,7 @@ import { CatalogStoreService } from './catalog-store.service';
                     title="Editar categoria"
                     aria-label="Editar categoria"
                   >
-                    <i class="pi pi-pencil text-xs"></i>
+                    <i class="pi pi-pencil text-sm"></i>
                   </button>
                   <button
                     type="button"
@@ -139,7 +139,7 @@ import { CatalogStoreService } from './catalog-store.service';
                     [title]="cat.active ? 'Desativar' : 'Reativar'"
                     [attr.aria-label]="cat.active ? 'Desativar categoria' : 'Reativar categoria'"
                   >
-                    <i [class]="cat.active ? 'pi pi-eye-slash text-xs' : 'pi pi-eye text-xs'"></i>
+                    <i [class]="cat.active ? 'pi pi-eye-slash text-sm' : 'pi pi-eye text-sm'"></i>
                   </button>
                   <button
                     type="button"
@@ -148,7 +148,7 @@ import { CatalogStoreService } from './catalog-store.service';
                     title="Excluir categoria"
                     aria-label="Excluir categoria"
                   >
-                    <i class="pi pi-trash text-xs"></i>
+                    <i class="pi pi-trash text-sm"></i>
                   </button>
                 </div>
               </div>
@@ -159,21 +159,21 @@ import { CatalogStoreService } from './catalog-store.service';
 
       <!-- Beneficiaries Tab -->
       @if (activeTab() === 'beneficiaries') {
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
           @for (ben of store.beneficiaries(); track ben.id) {
             <div
-              class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3"
+              class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shadow-xs"
               [class.opacity-60]="!ben.active"
             >
-              <div class="flex items-center gap-3 min-w-0">
-                <span class="w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-semibold text-sm shrink-0">
+              <div class="flex items-center gap-3.5 min-w-0">
+                <span class="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold text-base shrink-0">
                   {{ ben.name.charAt(0).toUpperCase() }}
                 </span>
                 <div class="min-w-0">
-                  <div class="font-medium text-sm truncate">{{ ben.name }}</div>
+                  <div class="font-semibold text-[15px] truncate">{{ ben.name }}</div>
                   <span
-                    class="text-xs font-medium"
-                    [class]="ben.active ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'"
+                    class="text-xs font-semibold"
+                    [class]="ben.active ? 'text-sky-600 dark:text-sky-400' : 'text-slate-400'"
                   >
                     {{ ben.active ? 'Ativo' : 'Inativo' }}
                   </span>
@@ -340,7 +340,7 @@ export class CatalogPageComponent implements OnInit {
   categoryForm: { name: string; type: TransactionType; color: string; icon: string } = {
     name: '',
     type: 'EXPENSE',
-    color: '#6366F1',
+    color: '#4F46E5',
     icon: 'pi pi-tag',
   };
 
@@ -388,7 +388,7 @@ export class CatalogPageComponent implements OnInit {
       this.categoryForm = {
         name: category.name,
         type: category.type,
-        color: category.color || '#6366F1',
+        color: category.color || '#4F46E5',
         icon: category.icon || 'pi pi-tag',
       };
     } else {
@@ -396,7 +396,7 @@ export class CatalogPageComponent implements OnInit {
       this.categoryForm = {
         name: '',
         type: 'EXPENSE',
-        color: '#6366F1',
+        color: '#4F46E5',
         icon: 'pi pi-tag',
       };
     }

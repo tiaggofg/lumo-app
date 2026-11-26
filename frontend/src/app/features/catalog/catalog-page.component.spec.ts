@@ -50,6 +50,7 @@ describe('CatalogPageComponent', () => {
     // Create category dialog rendered
     component.openCategoryDialog();
     fixture.detectChanges();
+    expect(component.categoryForm.color).toBe('#4F46E5');
     component.categoryForm.name = 'Pets';
     const saveCatSpy = vi.spyOn(store, 'createCategory').mockResolvedValue(store.categories()[0]);
     await component.saveCategory();
@@ -97,5 +98,7 @@ describe('CatalogPageComponent', () => {
 
     component.confirmDeleteBeneficiary(store.beneficiaries()[0]);
     expect(confirmSpy).toHaveBeenCalledTimes(2);
+
+    expect(fixture.nativeElement.innerHTML).not.toContain('emerald-');
   });
 });

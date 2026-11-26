@@ -18,8 +18,8 @@ import { BudgetsStoreService } from './budgets-store.service';
     <div class="space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold tracking-tight">Orçamentos Mensais</h1>
-          <p class="text-sm text-slate-500 dark:text-slate-400">
+          <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Orçamentos Mensais</h1>
+          <p class="text-[15px] text-slate-500 dark:text-slate-400 mt-1">
             Acompanhe receitas, despesas e saldo previsto vs. realizado de cada mês.
           </p>
         </div>
@@ -33,9 +33,9 @@ import { BudgetsStoreService } from './budgets-store.service';
       </div>
 
       @if (store.loadingList() && store.budgets().length === 0) {
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          @for (n of [1, 2, 3]; track n) {
-            <div class="h-48 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 animate-pulse"></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5">
+          @for (n of [1, 2, 3, 4]; track n) {
+            <div class="h-52 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 animate-pulse"></div>
           }
         </div>
       } @else if (store.budgets().length === 0) {
@@ -43,12 +43,12 @@ import { BudgetsStoreService } from './budgets-store.service';
           data-testid="budgets-empty-state"
           class="rounded-2xl bg-white dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-700 p-12 text-center space-y-4"
         >
-          <div class="w-14 h-14 mx-auto rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+          <div class="w-16 h-16 mx-auto rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
             <i class="pi pi-calendar-plus text-2xl"></i>
           </div>
-          <div class="space-y-1">
-            <h2 class="text-lg font-semibold">Nenhum orçamento mensal criado</h2>
-            <p class="text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+          <div class="space-y-1.5">
+            <h2 class="text-xl font-bold">Nenhum orçamento mensal criado</h2>
+            <p class="text-[15px] text-slate-500 dark:text-slate-400 max-w-md mx-auto">
               Crie o orçamento do mês atual para começar a controlar receitas, despesas e recorrências automaticamente.
             </p>
           </div>
@@ -60,19 +60,19 @@ import { BudgetsStoreService } from './budgets-store.service';
           />
         </div>
       } @else {
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5">
           @for (budget of store.budgets(); track budget.id) {
             <div
               [attr.data-testid]="'budget-card-' + budget.competenceMonth"
               (click)="openBudget(budget.id)"
-              class="group rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-emerald-500 dark:hover:border-emerald-500 p-5 shadow-xs transition-all cursor-pointer space-y-4"
+              class="group rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-indigo-500 dark:hover:border-indigo-500 p-6 shadow-xs transition-all cursor-pointer space-y-5"
             >
               <div class="flex items-start justify-between gap-2">
                 <div>
-                  <h2 class="text-lg font-semibold group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                  <h2 class="text-xl font-bold group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                     {{ budget.competenceMonth | competenceMonth }}
                   </h2>
-                  <p class="text-xs text-slate-500 dark:text-slate-400">
+                  <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mt-0.5">
                     {{ budget.transactionCount }} {{ budget.transactionCount === 1 ? 'lançamento' : 'lançamentos' }}
                   </p>
                 </div>
@@ -88,31 +88,31 @@ import { BudgetsStoreService } from './budgets-store.service';
                 </button>
               </div>
 
-              <div class="space-y-2 text-sm">
-                <div class="flex justify-between">
+              <div class="space-y-2.5 text-[15px]">
+                <div class="flex justify-between items-center">
                   <span class="text-slate-500 dark:text-slate-400">Receitas (Prev.)</span>
-                  <span class="font-medium text-emerald-600 dark:text-emerald-400 tabular-nums">
+                  <span class="font-semibold text-sky-600 dark:text-sky-400 tabular-nums">
                     {{ budget.summary.plannedIncome | brlCurrency }}
                   </span>
                 </div>
-                <div class="flex justify-between">
+                <div class="flex justify-between items-center">
                   <span class="text-slate-500 dark:text-slate-400">Despesas (Prev.)</span>
-                  <span class="font-medium text-rose-600 dark:text-rose-400 tabular-nums">
+                  <span class="font-semibold text-rose-600 dark:text-rose-400 tabular-nums">
                     {{ budget.summary.plannedExpense | brlCurrency }}
                   </span>
                 </div>
-                <div class="pt-2 border-t border-slate-100 dark:border-slate-800 flex justify-between">
-                  <span class="font-medium">Saldo Previsto</span>
+                <div class="pt-2.5 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                  <span class="font-semibold">Saldo Previsto</span>
                   <span
-                    class="font-bold tabular-nums"
-                    [class]="budget.summary.plannedBalance >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'"
+                    class="font-bold text-lg tabular-nums"
+                    [class]="budget.summary.plannedBalance >= 0 ? 'text-sky-600 dark:text-sky-400' : 'text-rose-600 dark:text-rose-400'"
                   >
                     {{ budget.summary.plannedBalance | brlCurrency }}
                   </span>
                 </div>
-                <div class="flex justify-between text-xs">
+                <div class="flex justify-between items-center text-sm">
                   <span class="text-slate-500 dark:text-slate-400">Saldo Realizado</span>
-                  <span class="font-semibold tabular-nums">
+                  <span class="font-semibold tabular-nums text-slate-700 dark:text-slate-200">
                     {{ budget.summary.realizedBalance | brlCurrency }}
                   </span>
                 </div>
@@ -120,13 +120,13 @@ import { BudgetsStoreService } from './budgets-store.service';
 
               <!-- Expense payment progress -->
               <div class="space-y-1.5">
-                <div class="flex justify-between text-xs text-slate-500 dark:text-slate-400">
+                <div class="flex justify-between text-xs font-medium text-slate-500 dark:text-slate-400">
                   <span>Despesas pagas</span>
-                  <span class="tabular-nums font-medium">{{ expenseProgress(budget) }}%</span>
+                  <span class="tabular-nums font-semibold">{{ expenseProgress(budget) }}%</span>
                 </div>
                 <div class="h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                   <div
-                    class="h-full rounded-full bg-emerald-500 transition-all"
+                    class="h-full rounded-full bg-sky-500 transition-all"
                     [style.width.%]="expenseProgress(budget)"
                   ></div>
                 </div>

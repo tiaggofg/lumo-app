@@ -34,14 +34,14 @@ Chart.register(
 );
 
 const FALLBACK_COLORS = [
-  '#6366F1',
-  '#10B981',
-  '#F59E0B',
-  '#EC4899',
-  '#0EA5E9',
-  '#8B5CF6',
-  '#EF4444',
-  '#14B8A6',
+  '#4F46E5',
+  '#0284C7',
+  '#E11D48',
+  '#D97706',
+  '#7C3AED',
+  '#0891B2',
+  '#DB2777',
+  '#EA580C',
 ];
 
 @Component({
@@ -148,13 +148,13 @@ export class BudgetChartsComponent implements AfterViewInit, OnDestroy {
             {
               label: 'Previsto (R$)',
               data: beneficiaries.map((b) => b.plannedAmount),
-              backgroundColor: '#6366F1',
+              backgroundColor: '#4F46E5',
               borderRadius: 6,
             },
             {
               label: 'Realizado (R$)',
               data: beneficiaries.map((b) => b.realizedAmount),
-              backgroundColor: '#10B981',
+              backgroundColor: '#0284C7',
               borderRadius: 6,
             },
           ],

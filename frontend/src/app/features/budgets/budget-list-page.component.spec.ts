@@ -93,5 +93,8 @@ describe('BudgetListPageComponent', () => {
     const confirmSpy = vi.spyOn(confirmationService, 'confirm');
     component.confirmDelete(new MouseEvent('click'), mockItem);
     expect(confirmSpy).toHaveBeenCalled();
+
+    expect(fixture.nativeElement.innerHTML).not.toContain('emerald-');
+    expect(fixture.nativeElement.innerHTML).toContain('2xl:grid-cols-4');
   });
 });

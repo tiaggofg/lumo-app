@@ -131,5 +131,7 @@ describe('RecurrencesPageComponent', () => {
     const confirmSpy = vi.spyOn(confirmationService, 'confirm');
     component.confirmDelete(sampleRule);
     expect(confirmSpy).toHaveBeenCalled();
+
+    expect(fixture.nativeElement.innerHTML).not.toContain('emerald-');
   });
 });

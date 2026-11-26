@@ -36,8 +36,8 @@ import { RecurrencesStoreService } from './recurrences-store.service';
     <div class="space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold tracking-tight">Recorrências</h1>
-          <p class="text-sm text-slate-500 dark:text-slate-400">
+          <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Recorrências</h1>
+          <p class="text-[15px] text-slate-500 dark:text-slate-400 mt-1">
             Configure contas fixas, variáveis estimadas, prazos definidos e parcelamentos automáticos.
           </p>
         </div>
@@ -51,7 +51,7 @@ import { RecurrencesStoreService } from './recurrences-store.service';
       </div>
 
       <!-- Filter Bar -->
-      <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
         <p-select
           [ngModel]="store.filters().active"
           (ngModelChange)="store.updateFilters({ active: $event })"
@@ -89,48 +89,48 @@ import { RecurrencesStoreService } from './recurrences-store.service';
       <!-- Recurrence Cards -->
       @if (store.recurrences().length === 0) {
         <div class="rounded-2xl bg-white dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-700 p-12 text-center space-y-3">
-          <p class="text-sm text-slate-500 dark:text-slate-400">
+          <p class="text-base text-slate-500 dark:text-slate-400">
             Nenhuma recorrência cadastrada ainda.
           </p>
           <p-button label="Criar primeira recorrência" icon="pi pi-plus" (onClick)="openFormDialog()" />
         </div>
       } @else {
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-5">
           @for (rule of store.recurrences(); track rule.id) {
             <div
               [attr.data-testid]="'recurrence-card-' + rule.description"
-              class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 space-y-3"
+              class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 space-y-4 shadow-xs"
               [class.opacity-60]="!rule.active"
             >
               <div class="flex items-start justify-between gap-3">
-                <div class="space-y-1 min-w-0">
+                <div class="space-y-1.5 min-w-0">
                   <div class="flex flex-wrap items-center gap-2">
-                    <h2 class="font-semibold text-base truncate">{{ rule.description }}</h2>
+                    <h2 class="font-bold text-lg truncate">{{ rule.description }}</h2>
                     <span
-                      class="px-2 py-0.5 rounded-full text-[11px] font-medium"
+                      class="px-2.5 py-0.5 rounded-full text-xs font-semibold"
                       [class]="
                         rule.type === 'INCOME'
-                          ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300'
-                          : 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300'
+                          ? 'bg-sky-100 text-sky-800 dark:bg-sky-900/45 dark:text-sky-300'
+                          : 'bg-rose-100 text-rose-800 dark:bg-rose-900/45 dark:text-rose-300'
                       "
                     >
                       {{ rule.type === 'INCOME' ? 'Receita' : 'Despesa' }}
                     </span>
-                    <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300">
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800 dark:bg-indigo-900/45 dark:text-indigo-300">
                       {{ modeLabel(rule) }}
                     </span>
                     <span
-                      class="px-2 py-0.5 rounded-full text-[11px] font-medium"
+                      class="px-2.5 py-0.5 rounded-full text-xs font-semibold"
                       [class]="
                         rule.amountType === 'ESTIMATED'
-                          ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300'
+                          ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/45 dark:text-amber-300'
                           : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
                       "
                     >
                       {{ rule.amountType === 'ESTIMATED' ? 'Estimado' : 'Fixo' }}
                     </span>
                   </div>
-                  <p class="text-xs text-slate-500 dark:text-slate-400">
+                  <p class="text-sm text-slate-500 dark:text-slate-400">
                     Início: {{ rule.startMonth }}
                     @if (rule.dueDay) {
                       • Vencimento dia {{ rule.dueDay }}
@@ -145,10 +145,10 @@ import { RecurrencesStoreService } from './recurrences-store.service';
                 </div>
 
                 <div class="text-right shrink-0">
-                  <div class="font-bold text-lg tabular-nums">{{ rule.amount | brlCurrency }}</div>
+                  <div class="font-extrabold text-xl tabular-nums">{{ rule.amount | brlCurrency }}</div>
                   <span
-                    class="text-xs font-medium"
-                    [class]="rule.active ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'"
+                    class="text-xs font-semibold"
+                    [class]="rule.active ? 'text-sky-600 dark:text-sky-400' : 'text-slate-400'"
                   >
                     {{ rule.active ? 'Ativa' : 'Inativa' }}
                   </span>
