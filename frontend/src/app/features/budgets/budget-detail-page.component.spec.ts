@@ -129,4 +129,84 @@ describe('BudgetDetailPageComponent', () => {
     component.confirmDeleteTransaction(sampleTxn);
     expect(confirmSpy).toHaveBeenCalled();
   });
+
+  it('should not render embedded charts, provide shortcut to /dashboard, and render Status header and row tooltips without emerald classes', () => {
+    vi.spyOn(catalogStore, 'loadAll').mockResolvedValue();
+    vi.spyOn(store, 'loadBudgetDetail').mockResolvedValue();
+    fixture.detectChanges();
+
+    store.currentDetail.set({
+      id: 'b1',
+      competenceMonth: '2026-11',
+      summary: {
+        plannedIncome: 6362.29,
+        realizedIncome: 6362.29,
+        plannedExpense: 1000,
+        realizedExpense: 500,
+        plannedBalance: 5362.29,
+        realizedBalance: 5862.29,
+      },
+      statusCounts: { estimated: 1, pending: 0, settled: 1 },
+      expensesByCategory: [
+        { id: 'c1', name: 'Contas Básicas', color: '#0284C7', plannedAmount: 180, realizedAmount: 0, count: 1 },
+      ],
+      expensesByBeneficiary: [
+        { id: 'ben1', name: 'Família', color: null, plannedAmount: 180, realizedAmount: 0, count: 1 },
+      ],
+      createdAt: '',
+      updatedAt: '',
+    });
+
+    const settledIncomeTxn: Transaction = {
+      ...sampleTxn,
+      id: 't2',
+      type: 'INCOME',
+      description: 'Salário',
+      amount: 6362.29,
+      status: 'SETTLED',
+    };
+    const pendingIncomeTxn: Transaction = {
+      ...sampleTxn,
+      id: 't3',
+      type: 'INCOME',
+      description: 'Bônus',
+      amount: 500,
+      status: 'PENDING',
+    };
+
+    store.transactions.set([sampleTxn, settledIncomeTxn, pendingIncomeTxn]);
+    fixture.detectChanges();
+
+    const hostEl: HTMLElement = fixture.nativeElement;
+
+    // 1. Embedded <app-budget-charts> must not be present
+    expect(hostEl.querySelector('app-budget-charts')).toBeNull();
+
+    // 2. Shortcut button to /dashboard must be present
+    const dashboardBtn: HTMLElement | null = hostEl.querySelector('[data-testid="open-dashboard-charts-btn"]');
+    expect(dashboardBtn).toBeTruthy();
+    expect(dashboardBtn?.textContent).toContain('Ver Gráficos no Dashboard');
+
+    // 3. Status column header must render "Status" with info icon and tooltip, not "Status (1-clique)"
+    expect(hostEl.textContent).not.toContain('Status (1-clique)');
+    const statusHeader: HTMLElement | null = hostEl.querySelector('[data-testid="status-column-header"]');
+    expect(statusHeader).toBeTruthy();
+    expect(statusHeader?.textContent?.trim()).toBe('Status');
+    expect(statusHeader?.querySelector('.pi-info-circle')).toBeTruthy();
+    expect(statusHeader?.getAttribute('data-tooltip')).toContain(
+      'Clique no status de qualquer lançamento para alternar'
+    );
+
+    // 4. Contextual tooltip on each row's status toggle button
+    const toggleAgua: HTMLElement | null = hostEl.querySelector('[data-testid="toggle-status-Água"]');
+    const toggleSalario: HTMLElement | null = hostEl.querySelector('[data-testid="toggle-status-Salário"]');
+    const toggleBonus: HTMLElement | null = hostEl.querySelector('[data-testid="toggle-status-Bônus"]');
+
+    expect(toggleAgua?.getAttribute('data-tooltip')).toBe('Clique para marcar como Pago');
+    expect(toggleSalario?.getAttribute('data-tooltip')).toBe('Clique para reverter para Pendente');
+    expect(toggleBonus?.getAttribute('data-tooltip')).toBe('Clique para marcar como Recebido');
+
+    // 5. Zero emerald-* classes
+    expect(hostEl.innerHTML).not.toContain('emerald-');
+  });
 });

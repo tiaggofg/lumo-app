@@ -219,13 +219,13 @@ T7 → T8 → T9 → T10
 **Requirement**: UI-01, UI-02, BUD-02
 
 **Done when**:
-- [ ] `<app-budget-charts>` is removed from `BudgetDetailPageComponent` and a `"Ver Gráficos no Dashboard"` action navigates to `/dashboard`
-- [ ] Table column header displays `"Status"` with `pi-info-circle` and `pTooltip` explaining the 1-click toggle (`data-testid="status-column-header"`)
-- [ ] Each row's status button binds a contextual `pTooltip` (`"Clique para marcar como Pago/Recebido"` or `"Clique para reverter para Pendente"`)
-- [ ] Table cells use `15px–16px` (`text-[15px]` / `text-base`), KPI cards use `text-3xl`, and all `emerald-*` classes are replaced by `indigo-*` (controls) and `sky-*` (income/positive balance/progress)
-- [ ] Unit tests verify removal of charts and presence of status header tooltip in `BudgetDetailPageComponent`
-- [ ] Gate check passes: `cd frontend && npm test -- --watch=false`
-- [ ] Test count: >= 26 unit tests pass
+- [x] `<app-budget-charts>` is removed from `BudgetDetailPageComponent` and a `"Ver Gráficos no Dashboard"` action navigates to `/dashboard`
+- [x] Table column header displays `"Status"` with `pi-info-circle` and `pTooltip` explaining the 1-click toggle (`data-testid="status-column-header"`)
+- [x] Each row's status button binds a contextual `pTooltip` (`"Clique para marcar como Pago/Recebido"` or `"Clique para reverter para Pendente"`)
+- [x] Table cells use `15px–16px` (`text-[15px]` / `text-base`), KPI cards use `text-3xl`, and all `emerald-*` classes are replaced by `indigo-*` (controls) and `sky-*` (income/positive balance/progress)
+- [x] Unit tests verify removal of charts and presence of status header tooltip in `BudgetDetailPageComponent`
+- [x] Gate check passes: `cd frontend && npm test -- --watch=false`
+- [x] Test count: >= 26 unit tests pass
 
 **Tests**: unit
 **Gate**: quick
@@ -331,7 +331,7 @@ Proof: run e2e | budget detail settle and confirm estimate
 The feature's live state, written as it happens - a compaction gives no warning.
 
 **Settled mid-build:** none
-**Dispatched:** batch-1 (Phases 1-2: T1..T7) at HEAD a339f13
+**Dispatched:** batch-1 (Phases 1-2: T1..T7) returned; batch-2 (Phase 3: T8..T10) at HEAD 8e8c6ec
 **Walked:** none
 
 ---

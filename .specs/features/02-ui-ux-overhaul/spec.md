@@ -133,7 +133,7 @@ Every ambiguity is resolved or recorded here.
 | UI-02 | P1: Layout Full-Width Fluido em todas as páginas | Tasks | In Tasks |
 | DASH-01 | P1: Página `/dashboard` como rota padrão com seletor de mês e gráficos multicoloridos | Execute | Done |
 | DASH-02 | P1: Gráfico de Evolução Mensal e Composição por Status no `/dashboard` | Execute | Done |
-| BUD-02 | P1: Remoção de gráficos de `/budgets/:id` e cabeçalho `Status` com `pTooltip` | Tasks | In Tasks |
+| BUD-02 | P1: Remoção de gráficos de `/budgets/:id` e cabeçalho `Status` com `pTooltip` | Execute | Done |
 
 **Coverage:** 5 total, 5 mapped to tasks, 0 unmapped
 
