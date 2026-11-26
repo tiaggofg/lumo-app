@@ -157,11 +157,11 @@ T7 → T8 → T9 → T10
 **Requirement**: DASH-01
 
 **Done when**:
-- [ ] `LUMO_CHART_PALETTE` defines 10 distinct high-contrast non-green hex colors (`#4F46E5`, `#0284C7`, `#E11D48`, `#D97706`, `#7C3AED`, `#0891B2`, `#DB2777`, `#EA580C`, `#2563EB`, `#9333EA`)
-- [ ] `resolveChartColors()` guarantees distinct colors across items even when input items have `null`, duplicate `#6366F1`, or legacy green (`#10B981`, `#22C55E`) colors
-- [ ] Unit tests in `chart-palette.spec.ts` verify color uniqueness and legacy green replacement
-- [ ] Gate check passes: `cd frontend && npm test -- --watch=false`
-- [ ] Test count: >= 21 unit tests pass
+- [x] `LUMO_CHART_PALETTE` defines 10 distinct high-contrast non-green hex colors (`#4F46E5`, `#0284C7`, `#E11D48`, `#D97706`, `#7C3AED`, `#0891B2`, `#DB2777`, `#EA580C`, `#2563EB`, `#9333EA`)
+- [x] `resolveChartColors()` guarantees distinct colors across items even when input items have `null`, duplicate `#6366F1`, or legacy green (`#10B981`, `#22C55E`) colors
+- [x] Unit tests in `chart-palette.spec.ts` verify color uniqueness and legacy green replacement
+- [x] Gate check passes: `cd frontend && npm test -- --watch=false`
+- [x] Test count: >= 21 unit tests pass
 
 **Tests**: unit
 **Gate**: quick
