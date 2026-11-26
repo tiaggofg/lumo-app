@@ -200,9 +200,9 @@ T7 → T8 → T9 → T10
 **Requirement**: DASH-01
 
 **Done when**:
-- [ ] Route `''` redirects to `'dashboard'` (`pathMatch: 'full'`)
-- [ ] Route `'dashboard'` lazy-loads `DashboardPageComponent`
-- [ ] Gate check passes: `cd frontend && npm run lint && npm run build`
+- [x] Route `''` redirects to `'dashboard'` (`pathMatch: 'full'`)
+- [x] Route `'dashboard'` lazy-loads `DashboardPageComponent`
+- [x] Gate check passes: `cd frontend && npm run lint && npm run build`
 
 **Tests**: none
 **Gate**: build
