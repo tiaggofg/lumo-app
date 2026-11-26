@@ -136,11 +136,11 @@ T7 → T8 → T9 → T10
 **Requirement**: UI-01
 
 **Done when**:
-- [ ] `SETTLED` badge renders Sapphire Blue (`sky-*`) instead of `emerald-*` while preserving `"Pago"` (`EXPENSE`) and `"Recebido"` (`INCOME`) labels
-- [ ] Badge padding and font size are scaled up (`px-3 py-1 text-[13px] font-semibold`)
-- [ ] Unit tests in `transaction-status-badge.component.spec.ts` verify the new Sapphire Blue classes and labels
-- [ ] Gate check passes: `cd frontend && npm test -- --watch=false`
-- [ ] Test count: >= 18 unit tests pass
+- [x] `SETTLED` badge renders Sapphire Blue (`sky-*`) instead of `emerald-*` while preserving `"Pago"` (`EXPENSE`) and `"Recebido"` (`INCOME`) labels
+- [x] Badge padding and font size are scaled up (`px-3 py-1 text-[13px] font-semibold`)
+- [x] Unit tests in `transaction-status-badge.component.spec.ts` verify the new Sapphire Blue classes and labels
+- [x] Gate check passes: `cd frontend && npm test -- --watch=false`
+- [x] Test count: >= 18 unit tests pass
 
 **Tests**: unit
 **Gate**: quick

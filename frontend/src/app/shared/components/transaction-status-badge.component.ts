@@ -8,9 +8,9 @@ import { TransactionStatus, TransactionType } from '../../core/models/api.models
     <span
       [class]="badgeClasses()"
       [attr.aria-label]="'Status: ' + label()"
-      class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap"
+      class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[13px] font-semibold whitespace-nowrap"
     >
-      <i [class]="iconClass() + ' text-[11px]'"></i>
+      <i [class]="iconClass() + ' text-xs'"></i>
       <span>{{ label() }}</span>
     </span>
   `,
@@ -36,11 +36,11 @@ export class TransactionStatusBadgeComponent {
   readonly badgeClasses = computed(() => {
     const s = this.status();
     if (s === 'ESTIMATED') {
-      return 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300';
+      return 'bg-amber-100 text-amber-800 dark:bg-amber-900/45 dark:text-amber-300';
     }
     if (s === 'PENDING') {
-      return 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300';
+      return 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300';
     }
-    return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300';
+    return 'bg-sky-100 text-sky-800 dark:bg-sky-900/45 dark:text-sky-300';
   });
 }
