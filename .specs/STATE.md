@@ -77,10 +77,10 @@
 ## Handoff
 
 - **Feature**: `02-ui-ux-overhaul`
-- **Phase / Task**: Spec & Tasks Approved — pronto para iniciar implementação (`T1..T10` pendentes em `.specs/features/02-ui-ux-overhaul/tasks.md`)
-- **Completed**: `01-lumo-mvp` implementado e verificado; `02-ui-ux-overhaul` especificado (`context.md`, `spec.md`, `design.md`, `tasks.md`) e aprovado pelo usuário
+- **Phase / Task**: Done — feature `02-ui-ux-overhaul` implementada, verificada (`T1..T10`, Vitest, Playwright E2E, Verifier independente e SonarQube Quality Gate OK) e enviada para `origin/main`
+- **Completed**: `01-lumo-mvp` e `02-ui-ux-overhaul` (`T1..T10`)
 - **In-progress** (file:line): none
-- **Next step**: Executar `/implement-spec-tasks 02-ui-ux-overhaul` (ou `/implement-spec-tasks`) em uma nova sessão para implementar e verificar `T1..T10`
+- **Next step**: Especificar e planejar a próxima feature (`03-zardui-migration` — migração de componentes PrimeNG para ZardUI) em uma nova sessão
 - **Blockers**: none
-- **Uncommitted files**: `backend/`, `frontend/`, `docker-compose.yml`, `README.md`, `AGENTS.md`, `docs/`, `sonar-project.properties`, `.gitignore`, `.specs/`
+- **Uncommitted files**: none
 - **Branch**: main

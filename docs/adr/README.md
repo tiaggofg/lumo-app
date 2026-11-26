@@ -12,3 +12,4 @@ As decisões arquiteturais ativas do projeto são mantidas em sincronia com [`.s
 | `AD-006` | Motor de `RecurringTransaction` (`INDEFINITE`, `FIXED_TERM`, `INSTALLMENT`), materialização idempotente e supressão | Active |
 | `AD-007` | API REST `/api/v1`, UUIDs de domínio, erros RFC 9457 (`application/problem+json`), sem auth na Fase 1 | Active |
 | `AD-008` | Frontend Angular v22 (Standalone + Signals) + Tailwind CSS v4 + PrimeNG v22 (MIT) + Chart.js + Light/Dark Mode | Active |
+| `AD-009` | Identidade visual **Royal Indigo (`#4F46E5`) & Azul Safira (`#0284C7`)** (zero verde), tipografia ampliada (**Plus Jakarta Sans** + **JetBrains Mono**), layout fluido full-width (`w-full`) e página dedicada de **Dashboard (`/dashboard`)** como rota padrão com gráficos multicoloridos | Active |

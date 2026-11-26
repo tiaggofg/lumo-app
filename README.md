@@ -5,7 +5,7 @@ Aplicação web full-stack para controle financeiro mensal pessoal e familiar, s
 ## Stack Tecnológica
 
 - **Backend**: Java 25 + Quarkus 3.33 LTS (`3.33.4.2`) + Maven (`./mvnw`), Clean Architecture + DDD, Hibernate ORM, Liquibase (SQL formatado), SmallRye OpenAPI & Health, RFC 9457 (`application/problem+json`).
-- **Frontend**: Angular v22 (Standalone Components + Signals), Tailwind CSS v4, PrimeNG v22 (componentes MIT/gratuitos), Chart.js.
+- **Frontend**: Angular v22 (Standalone Components + Signals), Tailwind CSS v4, PrimeNG v22 (preset Aura Royal Indigo), Chart.js, tipografia **Plus Jakarta Sans** + **JetBrains Mono** (`tabular-nums`), layout fluido full-width (`w-full`) e **Dashboard Analítico Multicolorido (`/dashboard`)** como rota padrão.
 - **Banco de Dados**: PostgreSQL 17 (`docker-compose.yml`).
 - **Testes**: JUnit 5, AssertJ, ArchUnit, Mockito, RestAssured + Testcontainers (backend); Vitest (frontend unit); Playwright (E2E desktop e mobile).
 

@@ -34,3 +34,18 @@ flowchart TD
 - `application..` não acessa `infrastructure..`, `jakarta.persistence..` nem `jakarta.ws.rs..`.
 - `@Command` e `@Query` só podem ser usados em `..application..`.
 - Nenhum `AggregateRoot` em `..domain..` pode possuir anotações JPA (`@Entity`, `@Table`).
+
+## 4. Arquitetura do Frontend (`AD-008`, `AD-009`)
+
+```mermaid
+flowchart LR
+  Shell["AppShellComponent (Full-Width w-full + Royal Indigo Nav)"] --> Dash["/dashboard — DashboardPageComponent (KPIs + 4 Gráficos Multicoloridos)"]
+  Shell --> Budgets["/budgets — BudgetListPageComponent"]
+  Shell --> Detail["/budgets/:id — BudgetDetailPageComponent (Tabela + Tooltip Status 1-clique)"]
+  Shell --> Rec["/recurrences — RecurrencesPageComponent"]
+  Shell --> Cat["/catalog — CatalogPageComponent"]
+  Dash --> Store["BudgetsStoreService (Signals)"]
+  Budgets --> Store
+  Detail --> Store
+  Dash --> Palette["chart-palette.ts (LUMO_CHART_PALETTE 10 cores sem verde)"]
+```
