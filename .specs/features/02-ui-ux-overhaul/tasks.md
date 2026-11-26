@@ -95,9 +95,9 @@ T7 → T8 → T9 → T10
 **Requirement**: UI-01
 
 **Done when**:
-- [ ] `app.config.ts` defines a custom `LumoIndigoPreset` extending `Aura` with `indigo` as the semantic primary color palette
-- [ ] All PrimeNG primary buttons, focus rings, checkboxes, and selects render in Royal Indigo (`#4F46E5` / `#6366F1`) in Light and Dark modes
-- [ ] Gate check passes: `cd frontend && npm run lint && npm run build`
+- [x] `app.config.ts` defines a custom `LumoIndigoPreset` extending `Aura` with `indigo` as the semantic primary color palette
+- [x] All PrimeNG primary buttons, focus rings, checkboxes, and selects render in Royal Indigo (`#4F46E5` / `#6366F1`) in Light and Dark modes
+- [x] Gate check passes: `cd frontend && npm run lint && npm run build`
 
 **Tests**: none
 **Gate**: build
