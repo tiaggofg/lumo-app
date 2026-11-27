@@ -1,11 +1,7 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import {
-  LumoLogoComponent,
-  ZConfirmDialogComponent,
-  ZToastViewportComponent,
-  ZTooltipDirective,
-} from '../../shared/ui';
+import { LumoLogoComponent, ZTooltipDirective } from '../../shared/ui';
+import { AuthService } from '../auth/auth.service';
 import { ThemeService } from '../services/theme.service';
 
 export const SIDEBAR_COLLAPSED_STORAGE_KEY = 'lumo-sidebar-collapsed';
@@ -13,19 +9,8 @@ export const SIDEBAR_COLLAPSED_STORAGE_KEY = 'lumo-sidebar-collapsed';
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [
-    RouterOutlet,
-    RouterLink,
-    RouterLinkActive,
-    LumoLogoComponent,
-    ZToastViewportComponent,
-    ZConfirmDialogComponent,
-    ZTooltipDirective,
-  ],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, LumoLogoComponent, ZTooltipDirective],
   template: `
-    <z-toast-viewport />
-    <z-confirm-dialog />
-
     <div class="min-h-screen flex flex-col lg:flex-row bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
       <!-- Desktop Sidebar (Fixed 100dvh, Dark Surface in Light & Dark Mode, Collapsible Rail) -->
       <aside
@@ -93,7 +78,7 @@ export const SIDEBAR_COLLAPSED_STORAGE_KEY = 'lumo-sidebar-collapsed';
           }
         </nav>
 
-        <!-- Sidebar Footer: Expand Button (when collapsed) + Theme Toggle -->
+        <!-- Sidebar Footer: Expand Button (when collapsed) + Theme Toggle + User Profile & Logout -->
         <div class="p-3 border-t border-slate-800/90 shrink-0 space-y-1.5">
           @if (sidebarCollapsed()) {
             <button
@@ -135,6 +120,61 @@ export const SIDEBAR_COLLAPSED_STORAGE_KEY = 'lumo-sidebar-collapsed';
               }
             </span>
           </button>
+
+          @if (authService.user(); as currentUser) {
+            <div class="pt-2 mt-2 border-t border-slate-800/90 space-y-1.5">
+              <div
+                data-testid="user-profile-desktop"
+                [zTooltip]="sidebarCollapsed() ? currentUser.name + ' (' + currentUser.email + ')' : ''"
+                tooltipPosition="right"
+                [class]="
+                  'flex items-center rounded-xl ' +
+                  (sidebarCollapsed() ? 'justify-center py-1.5' : 'gap-3 px-2.5 py-2')
+                "
+              >
+                @if (currentUser.avatarUrl) {
+                  <img
+                    [src]="currentUser.avatarUrl"
+                    [alt]="currentUser.name"
+                    referrerpolicy="no-referrer"
+                    class="w-9 h-9 rounded-full object-cover ring-2 ring-indigo-500/40 shrink-0"
+                  />
+                } @else {
+                  <span
+                    class="w-9 h-9 rounded-full bg-indigo-600/90 text-white text-xs font-bold flex items-center justify-center shrink-0 ring-2 ring-indigo-400/30"
+                    aria-hidden="true"
+                  >
+                    {{ userInitials() }}
+                  </span>
+                }
+
+                @if (!sidebarCollapsed()) {
+                  <div class="min-w-0 flex-1">
+                    <p class="text-sm font-semibold text-white truncate">{{ currentUser.name }}</p>
+                    <p class="text-xs text-slate-400 truncate">{{ currentUser.email }}</p>
+                  </div>
+                }
+              </div>
+
+              <button
+                type="button"
+                data-testid="logout-button-desktop"
+                (click)="onLogout()"
+                [zTooltip]="sidebarCollapsed() ? 'Sair' : ''"
+                tooltipPosition="right"
+                aria-label="Sair"
+                [class]="
+                  'w-full flex items-center rounded-xl text-sm text-slate-300 hover:text-rose-300 hover:bg-rose-950/50 transition-colors cursor-pointer ' +
+                  (sidebarCollapsed() ? 'justify-center py-2.5 px-0' : 'gap-3 px-3.5 py-2.5')
+                "
+              >
+                <i class="pi pi-sign-out text-base shrink-0" aria-hidden="true"></i>
+                @if (!sidebarCollapsed()) {
+                  <span>Sair</span>
+                }
+              </button>
+            </div>
+          }
         </div>
       </aside>
 
@@ -200,6 +240,42 @@ export const SIDEBAR_COLLAPSED_STORAGE_KEY = 'lumo-sidebar-collapsed';
                 <span>{{ item.label }}</span>
               </a>
             }
+
+            @if (authService.user(); as currentUser) {
+              <div class="mt-auto pt-4 border-t border-slate-800 space-y-2">
+                <div data-testid="user-profile-mobile" class="flex items-center gap-3 px-2 py-1.5">
+                  @if (currentUser.avatarUrl) {
+                    <img
+                      [src]="currentUser.avatarUrl"
+                      [alt]="currentUser.name"
+                      referrerpolicy="no-referrer"
+                      class="w-9 h-9 rounded-full object-cover ring-2 ring-indigo-500/40 shrink-0"
+                    />
+                  } @else {
+                    <span
+                      class="w-9 h-9 rounded-full bg-indigo-600/90 text-white text-xs font-bold flex items-center justify-center shrink-0"
+                      aria-hidden="true"
+                    >
+                      {{ userInitials() }}
+                    </span>
+                  }
+                  <div class="min-w-0 flex-1">
+                    <p class="text-sm font-semibold text-white truncate">{{ currentUser.name }}</p>
+                    <p class="text-xs text-slate-400 truncate">{{ currentUser.email }}</p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  data-testid="logout-button-mobile"
+                  (click)="onLogout()"
+                  class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-slate-300 hover:text-rose-300 hover:bg-rose-950/50 transition-colors cursor-pointer"
+                >
+                  <i class="pi pi-sign-out text-base" aria-hidden="true"></i>
+                  <span>Sair</span>
+                </button>
+              </div>
+            }
           </nav>
         </div>
       }
@@ -213,8 +289,22 @@ export const SIDEBAR_COLLAPSED_STORAGE_KEY = 'lumo-sidebar-collapsed';
 })
 export class AppShellComponent {
   readonly themeService = inject(ThemeService);
+  readonly authService = inject(AuthService);
   readonly mobileMenuOpen = signal(false);
   readonly sidebarCollapsed = signal(this.readInitialCollapsedState());
+
+  readonly userInitials = computed(() => {
+    const user = this.authService.user();
+    if (!user) {
+      return '?';
+    }
+    const source = (user.name || user.email || '').trim();
+    const parts = source.split(/\s+/).filter(Boolean);
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+    }
+    return source.slice(0, 2).toUpperCase();
+  });
 
   readonly navItems = [
     { label: 'Dashboard', route: '/dashboard', icon: 'pi pi-chart-pie' },
@@ -231,6 +321,11 @@ export class AppShellComponent {
     } catch {
       // Safe fallback when localStorage is unavailable
     }
+  }
+
+  async onLogout(): Promise<void> {
+    this.mobileMenuOpen.set(false);
+    await this.authService.logout();
   }
 
   private readInitialCollapsedState(): boolean {

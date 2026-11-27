@@ -103,4 +103,21 @@ describe('problemDetailInterceptor & ZToastViewportComponent', () => {
 
     expect(toastService.toasts().some((t) => t.id === id)).toBe(false);
   });
+
+  it('should not display an error toast on 401 from /api/v1/auth/me or /api/v1/auth/refresh', () => {
+    const addSpy = vi.spyOn(toastService, 'add');
+
+    http.get('/api/v1/auth/me').subscribe({ error: () => undefined });
+    httpMock
+      .expectOne('/api/v1/auth/me')
+      .flush({ status: 401, title: 'Unauthorized', detail: 'Missing cookie' }, { status: 401, statusText: 'Unauthorized' });
+
+    http.post('/api/v1/auth/refresh', {}).subscribe({ error: () => undefined });
+    httpMock
+      .expectOne('/api/v1/auth/refresh')
+      .flush({ status: 401, title: 'Unauthorized', detail: 'Expired' }, { status: 401, statusText: 'Unauthorized' });
+
+    expect(addSpy).not.toHaveBeenCalled();
+    expect(toastService.toasts()).toHaveLength(0);
+  });
 });

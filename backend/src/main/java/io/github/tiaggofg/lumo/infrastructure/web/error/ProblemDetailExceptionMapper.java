@@ -1,5 +1,9 @@
 package io.github.tiaggofg.lumo.infrastructure.web.error;
 
+import io.github.tiaggofg.lumo.domain.auth.AccountDisabledException;
+import io.github.tiaggofg.lumo.domain.auth.DevLoginDisabledException;
+import io.github.tiaggofg.lumo.domain.auth.EmailNotAllowedException;
+import io.github.tiaggofg.lumo.domain.auth.UnauthorizedException;
 import io.github.tiaggofg.lumo.domain.shared.BusinessRuleViolationException;
 import io.github.tiaggofg.lumo.domain.shared.DomainValidationException;
 import io.github.tiaggofg.lumo.domain.shared.ResourceConflictException;
@@ -23,6 +27,7 @@ import java.util.List;
 public class ProblemDetailExceptionMapper implements ExceptionMapper<Throwable> {
 
     public static final String PROBLEM_JSON = "application/problem+json";
+    private static final String PROBLEM_NOT_FOUND = "https://lumo.local/problems/not-found";
     private static final Logger LOG = Logger.getLogger(ProblemDetailExceptionMapper.class);
 
     @Context
@@ -60,10 +65,43 @@ public class ProblemDetailExceptionMapper implements ExceptionMapper<Throwable> 
             );
         }
 
+        if (exception instanceof UnauthorizedException unauthorizedEx) {
+            return buildResponse(
+                    Response.Status.UNAUTHORIZED.getStatusCode(),
+                    "https://lumo.local/problems/unauthorized",
+                    "Unauthorized",
+                    unauthorizedEx.getMessage(),
+                    instance,
+                    null
+            );
+        }
+
+        if (exception instanceof AccountDisabledException || exception instanceof EmailNotAllowedException) {
+            return buildResponse(
+                    Response.Status.FORBIDDEN.getStatusCode(),
+                    "https://lumo.local/problems/forbidden",
+                    "Forbidden",
+                    exception.getMessage(),
+                    instance,
+                    null
+            );
+        }
+
+        if (exception instanceof DevLoginDisabledException devDisabledEx) {
+            return buildResponse(
+                    Response.Status.NOT_FOUND.getStatusCode(),
+                    PROBLEM_NOT_FOUND,
+                    "Resource Not Found",
+                    devDisabledEx.getMessage(),
+                    instance,
+                    null
+            );
+        }
+
         if (exception instanceof ResourceNotFoundException notFoundEx) {
             return buildResponse(
                     Response.Status.NOT_FOUND.getStatusCode(),
-                    "https://lumo.local/problems/not-found",
+                    PROBLEM_NOT_FOUND,
                     "Resource Not Found",
                     notFoundEx.getMessage(),
                     instance,
@@ -112,7 +150,7 @@ public class ProblemDetailExceptionMapper implements ExceptionMapper<Throwable> 
             int status = webEx.getResponse() != null ? webEx.getResponse().getStatus() : 500;
             String title = status >= 400 && status < 500 ? "Client Error" : "Internal Server Error";
             String type = status == 404
-                    ? "https://lumo.local/problems/not-found"
+                    ? PROBLEM_NOT_FOUND
                     : "https://lumo.local/problems/http-" + status;
             return buildResponse(
                     status,

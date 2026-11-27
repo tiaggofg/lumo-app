@@ -1,10 +1,14 @@
 package io.github.tiaggofg.lumo.infrastructure.web.catalog;
 
+import io.github.tiaggofg.lumo.infrastructure.auth.AuthTestHelper;
 import io.quarkus.test.junit.QuarkusTest;
+import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
@@ -21,6 +25,16 @@ class CategoryResourceIT {
 
     @Inject
     EntityManager entityManager;
+
+    @BeforeEach
+    void authenticate() {
+        RestAssured.requestSpecification = AuthTestHelper.devRequestSpec();
+    }
+
+    @AfterEach
+    void clearAuth() {
+        RestAssured.requestSpecification = null;
+    }
 
     @Test
     void shouldCreateListUpdateDeactivateAndDeleteCategory() {

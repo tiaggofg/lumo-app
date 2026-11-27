@@ -4,12 +4,17 @@ import { catchError, throwError } from 'rxjs';
 import { ZToastService } from '../../shared/ui/toast/z-toast.service';
 import { ProblemDetail } from '../models/api.models';
 
+const SILENT_401_PATHS = ['/api/v1/auth/me', '/api/v1/auth/refresh'];
+
 export const problemDetailInterceptor: HttpInterceptorFn = (req, next) => {
   const toastService = inject(ZToastService);
 
   return next(req).pipe(
     catchError((error: unknown) => {
       if (error instanceof HttpErrorResponse) {
+        if (error.status === 401 && SILENT_401_PATHS.some((path) => req.url.includes(path))) {
+          return throwError(() => error);
+        }
         const problem = extractProblemDetail(error);
         const summary = problem?.title ?? `Erro (${error.status || 'Conexão'})`;
         const detail =

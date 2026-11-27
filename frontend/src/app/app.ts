@@ -1,10 +1,15 @@
 import { Component } from '@angular/core';
-import { AppShellComponent } from './core/layout/app-shell.component';
+import { RouterOutlet } from '@angular/router';
+import { ZConfirmDialogComponent, ZToastViewportComponent } from './shared/ui';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [AppShellComponent],
-  template: `<app-shell />`,
+  imports: [RouterOutlet, ZToastViewportComponent, ZConfirmDialogComponent],
+  template: `
+    <z-toast-viewport />
+    <z-confirm-dialog />
+    <router-outlet />
+  `,
 })
 export class App {}

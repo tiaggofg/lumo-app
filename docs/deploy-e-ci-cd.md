@@ -18,7 +18,14 @@ Sobe PostgreSQL 17 (`5432`), Backend Quarkus (`8080`) e Frontend Angular/Nginx (
    ```bash
    cd backend && ./mvnw quarkus:dev
    ```
-   Variáveis configuráveis em produção (`%prod`): `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `LUMO_TIMEZONE` (padrão `America/Sao_Paulo`).
+   Variáveis configuráveis em produção (`%prod`):
+   - **Banco & Timezone**: `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `LUMO_TIMEZONE` (padrão `America/Sao_Paulo`).
+   - **Autenticação (`AD-011`)**:
+     - `LUMO_AUTH_JWT_SECRET` (**obrigatória em `%prod`**, mínimo 32 caracteres)
+     - `GOOGLE_OAUTH_CLIENT_ID` e `GOOGLE_OAUTH_CLIENT_SECRET` (credenciais OAuth 2.0 Web Application no Google Cloud Console)
+     - `GOOGLE_OAUTH_REDIRECT_URI` (ex.: `https://lumo.seudominio.com/api/v1/auth/google/callback`; padrão local `http://localhost:4200/api/v1/auth/google/callback`)
+     - `LUMO_AUTH_COOKIE_SECURE` (`true` em `%prod`, `false` em `%dev`/`%test`)
+     - `LUMO_ALLOWED_EMAILS` (opcional, vazia por padrão = confia nos *Test users* do Google Cloud; quando preenchida com e-mails separados por vírgula, restringe o login à allowlist)
 3. **Frontend (Angular v22 + Node 24.15+)**:
    ```bash
    cd frontend && npm install && npm start

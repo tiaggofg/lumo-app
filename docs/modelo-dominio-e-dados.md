@@ -46,13 +46,31 @@ classDiagram
     +String name
     +boolean active
   }
+  class User {
+    +UUID id
+    +String googleSub
+    +String email
+    +String name
+    +String avatarUrl
+    +boolean active
+  }
+  class RefreshSession {
+    +UUID id
+    +UUID userId
+    +String tokenHash
+    +Instant expiresAt
+    +Instant revokedAt
+    +isUsableAt(Instant) boolean
+  }
   RecurringTransaction ..> Transaction : materializes
+  User "1" --> "*" RefreshSession : owns
 ```
 
 ## 2. Modelo de Persistência (ER PostgreSQL)
 
 ```mermaid
 erDiagram
+  USERS ||--o{ REFRESH_SESSIONS : owns
   CATEGORIES ||--o{ TRANSACTIONS : classifies
   BENEFICIARIES ||--o{ TRANSACTIONS : assigns
   CATEGORIES ||--o{ RECURRING_TRANSACTIONS : classifies
@@ -64,6 +82,9 @@ erDiagram
 ```
 
 ## 3. Índices e Constraints Principais
+
+- `users`: `UNIQUE (google_sub)` (`uq_users_google_sub`), `UNIQUE (email)` (`uq_users_email`)
+- `refresh_sessions`: `UNIQUE (token_hash)` (`uq_refresh_sessions_token_hash`), `FK user_id -> users(id) ON DELETE CASCADE`, índices `idx_refresh_sessions_user_id` e `idx_refresh_sessions_expires_at`
 
 - `categories`: `UNIQUE (LOWER(name), type)`
 - `beneficiaries`: `UNIQUE (LOWER(name))`

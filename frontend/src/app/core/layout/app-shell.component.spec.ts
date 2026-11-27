@@ -1,13 +1,36 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { AuthUser } from '../auth/auth.models';
+import { AuthService } from '../auth/auth.service';
 import { AppShellComponent, SIDEBAR_COLLAPSED_STORAGE_KEY } from './app-shell.component';
 
 describe('AppShellComponent', () => {
+  let userSignal: ReturnType<typeof signal<AuthUser | null>>;
+  let logoutSpy: ReturnType<typeof vi.fn>;
+
   beforeEach(() => {
     localStorage.removeItem(SIDEBAR_COLLAPSED_STORAGE_KEY);
+    userSignal = signal<AuthUser | null>({
+      id: 'u-1',
+      email: 'dev@lumo.local',
+      name: 'Desenvolvedor Lumo',
+      avatarUrl: null,
+    });
+    logoutSpy = vi.fn().mockResolvedValue(undefined);
+
     TestBed.configureTestingModule({
       imports: [AppShellComponent],
-      providers: [provideRouter([])],
+      providers: [
+        provideRouter([]),
+        {
+          provide: AuthService,
+          useValue: {
+            user: userSignal,
+            logout: logoutSpy,
+          },
+        },
+      ],
     });
   });
 
@@ -15,7 +38,7 @@ describe('AppShellComponent', () => {
     localStorage.removeItem(SIDEBAR_COLLAPSED_STORAGE_KEY);
   });
 
-  it('should render navigation links, Lumo SVG logo and toggle mobile menu', () => {
+  it('should render navigation links, Lumo SVG logo, user profile and logout buttons', () => {
     const fixture = TestBed.createComponent(AppShellComponent);
     fixture.detectChanges();
 
@@ -26,15 +49,18 @@ describe('AppShellComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Orçamentos');
     expect(fixture.nativeElement.textContent).toContain('Recorrências');
     expect(fixture.nativeElement.textContent).toContain('Cadastros');
+    expect(fixture.nativeElement.textContent).toContain('Desenvolvedor Lumo');
+    expect(fixture.nativeElement.textContent).toContain('dev@lumo.local');
+    expect(fixture.componentInstance.userInitials()).toBe('DL');
 
     expect(fixture.nativeElement.querySelector('app-lumo-logo')).toBeTruthy();
-    expect(fixture.nativeElement.querySelector('z-toast-viewport')).toBeTruthy();
-    expect(fixture.nativeElement.querySelector('z-confirm-dialog')).toBeTruthy();
 
-    expect(fixture.componentInstance.mobileMenuOpen()).toBe(false);
-    fixture.componentInstance.mobileMenuOpen.set(true);
-    fixture.detectChanges();
-    expect(fixture.componentInstance.mobileMenuOpen()).toBe(true);
+    const logoutBtn: HTMLButtonElement = fixture.nativeElement.querySelector(
+      '[data-testid="logout-button-desktop"]'
+    );
+    expect(logoutBtn).toBeTruthy();
+    logoutBtn.click();
+    expect(logoutSpy).toHaveBeenCalledTimes(1);
   });
 
   it('should render Dark Sidebar (bg-slate-900), bg-slate-100 canvas, fluid full-width main and fixed h-dvh sticky top-0 sidebar', () => {
@@ -72,7 +98,6 @@ describe('AppShellComponent', () => {
     const toggleBtn: HTMLButtonElement = fixture.nativeElement.querySelector(
       '[data-testid="sidebar-collapse-toggle"]'
     );
-    expect(toggleBtn).toBeTruthy();
     toggleBtn.click();
     fixture.detectChanges();
 
@@ -80,20 +105,21 @@ describe('AppShellComponent', () => {
     expect(asideEl.className).toContain('lg:w-20');
     expect(localStorage.getItem(SIDEBAR_COLLAPSED_STORAGE_KEY)).toBe('true');
 
-    // In collapsed mode, logo switches to mark variant and nav links expose data-tooltip
     const logoEl = asideEl.querySelector('[data-testid="lumo-logo"]');
     expect(logoEl?.getAttribute('data-variant')).toBe('mark');
 
     const navLinks = asideEl.querySelectorAll('nav a');
     expect(navLinks[0].getAttribute('data-tooltip')).toBe('Dashboard');
 
-    // Re-instantiate component and verify state restored from localStorage
+    const logoutBtn = asideEl.querySelector('[data-testid="logout-button-desktop"]');
+    expect(logoutBtn?.getAttribute('data-tooltip')).toBe('Sair');
+
     const secondFixture = TestBed.createComponent(AppShellComponent);
     secondFixture.detectChanges();
     expect(secondFixture.componentInstance.sidebarCollapsed()).toBe(true);
   });
 
-  it('should render full Lumo logo and navigation labels in mobile drawer even when desktop sidebar is collapsed', () => {
+  it('should render full Lumo logo, user profile and logout button in mobile drawer', () => {
     localStorage.setItem(SIDEBAR_COLLAPSED_STORAGE_KEY, 'true');
     const fixture = TestBed.createComponent(AppShellComponent);
     fixture.componentInstance.mobileMenuOpen.set(true);
@@ -104,9 +130,16 @@ describe('AppShellComponent', () => {
     );
     expect(drawer).toBeTruthy();
     expect(drawer?.textContent).toContain('Dashboard');
-    expect(drawer?.textContent).toContain('Orçamentos');
+    expect(drawer?.textContent).toContain('Desenvolvedor Lumo');
     const drawerLogo = drawer?.querySelector('[data-testid="lumo-logo"]');
     expect(drawerLogo?.getAttribute('data-variant')).toBe('full');
+
+    const mobileLogout: HTMLButtonElement | null = drawer?.querySelector(
+      '[data-testid="logout-button-mobile"]'
+    ) ?? null;
+    expect(mobileLogout).toBeTruthy();
+    mobileLogout?.click();
+    expect(logoutSpy).toHaveBeenCalled();
   });
 
   it('should fall back gracefully when localStorage throws an error', () => {

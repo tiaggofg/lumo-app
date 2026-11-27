@@ -13,6 +13,11 @@ frontend/test-results/
 # SonarQube / Scanner
 .scannerwork/
 
+# Environment / Secrets
+.env
+.env.*
+!.env.example
+
 # IDE / OS
 .idea/
 .vscode/

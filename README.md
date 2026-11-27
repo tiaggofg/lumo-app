@@ -4,7 +4,7 @@ Aplicação web full-stack para controle financeiro mensal pessoal e familiar, s
 
 ## Stack Tecnológica
 
-- **Backend**: Java 25 + Quarkus 3.33 LTS (`3.33.4.2`) + Maven (`./mvnw`), Clean Architecture + DDD, Hibernate ORM, Liquibase (SQL formatado), SmallRye OpenAPI & Health, RFC 9457 (`application/problem+json`).
+- **Backend**: Java 25 + Quarkus 3.33 LTS (`3.33.4.2`) + Maven (`./mvnw`), Clean Architecture + DDD, Hibernate ORM, Liquibase (SQL formatado), autenticação **Google OAuth 2.0 + PKCE** com cookies `HttpOnly` (`lumo_access` JWT 15m + `lumo_refresh` rotativo 30d), SmallRye OpenAPI & Health, RFC 9457 (`application/problem+json`).
 - **Frontend**: Angular v22 (Standalone Components + Signals), Tailwind CSS v4, suíte própria de componentes **ZardUI (estilo shadcn/ui para Angular — 100% MIT)** em `shared/ui/`, Chart.js com containers `<z-chart-container>` (shadcn Charts), identidade de marca vetorial **"Prisma de Luz & Camadas"** (`<app-lumo-logo>`), Dark Sidebar fixa (`100dvh`) com modo recolhível (`w-20`), tipografia **Plus Jakarta Sans** + **JetBrains Mono** (`tabular-nums`), layout fluido full-width (`w-full`) e **Dashboard Analítico Multicolorido (`/dashboard`)** como rota padrão.
 - **Banco de Dados**: PostgreSQL 17 (`docker-compose.yml`).
 - **Testes**: JUnit 5, AssertJ, ArchUnit, Mockito, RestAssured + Testcontainers (backend); Vitest (frontend unit); Playwright (E2E desktop e mobile).

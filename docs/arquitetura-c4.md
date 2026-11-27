@@ -11,7 +11,8 @@ flowchart LR
 
 ```mermaid
 flowchart TB
-  SPA["Frontend SPA — Angular v22 + ZardUI (100% MIT) + Tailwind CSS v4"] -->|HTTP JSON /api/v1| API["Backend API — Java 25 + Quarkus 3.33 LTS"]
+  SPA["Frontend SPA — Angular v22 + ZardUI (100% MIT) + Tailwind CSS v4"] -->|HTTP JSON + HttpOnly Cookies /api/v1| API["Backend API — Java 25 + Quarkus 3.33 LTS"]
+  API -->|OAuth 2.0 + PKCE / JWKS RS256| Google["Google Identity"]
   API -->|JDBC / Liquibase| DB[("PostgreSQL 17 (lumo_db)")]
 ```
 
@@ -19,7 +20,9 @@ flowchart TB
 
 ```mermaid
 flowchart TD
-  REST["infrastructure.web (Jakarta REST + RFC 9457 Mapper)"] --> CMD["application (@Command Use Cases)"]
+  FILTER["infrastructure.auth (AuthRequestFilter + AuthResource + GoogleOAuthHttpClient + JwtTokenService)"] --> REST["infrastructure.web (Jakarta REST + RFC 9457 Mapper)"]
+  FILTER --> CMD["application (@Command Use Cases — Financeiro & Auth)"]
+  REST --> CMD
   REST --> QRY["application (@Query Use Cases)"]
   CMD --> DOM["domain (Pure Java Aggregates, VOs, Repository Ports)"]
   QRY --> RMP["application (BudgetReadModelPort, TransactionQueryPort)"]

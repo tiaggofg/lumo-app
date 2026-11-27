@@ -30,7 +30,40 @@ class LiquibaseMigrationIT {
                 "monthly_budgets",
                 "recurring_transactions",
                 "transactions",
-                "recurring_occurrence_exclusions"
+                "recurring_occurrence_exclusions",
+                "users",
+                "refresh_sessions"
+        );
+    }
+
+    @Test
+    void shouldCreateAuthUniqueConstraintsAndIndexes() {
+        @SuppressWarnings("unchecked")
+        List<String> constraints = entityManager.createNativeQuery("""
+                SELECT constraint_name
+                FROM information_schema.table_constraints
+                WHERE table_schema = 'public'
+                  AND table_name IN ('users', 'refresh_sessions')
+                  AND constraint_type = 'UNIQUE'
+                """).getResultList();
+
+        assertThat(constraints).contains(
+                "uq_users_google_sub",
+                "uq_users_email",
+                "uq_refresh_sessions_token_hash"
+        );
+
+        @SuppressWarnings("unchecked")
+        List<String> indexes = entityManager.createNativeQuery("""
+                SELECT indexname
+                FROM pg_indexes
+                WHERE schemaname = 'public'
+                  AND tablename = 'refresh_sessions'
+                """).getResultList();
+
+        assertThat(indexes).contains(
+                "idx_refresh_sessions_user_id",
+                "idx_refresh_sessions_expires_at"
         );
     }
 

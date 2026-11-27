@@ -3,6 +3,10 @@ import { expect, test } from '@playwright/test';
 const API_BASE = process.env['LUMO_API_URL'] || 'http://localhost:8080/api/v1';
 
 async function resetTestData(request: import('@playwright/test').APIRequestContext): Promise<void> {
+  // Authenticate API context via dev-login
+  const authRes = await request.post(`${API_BASE}/auth/dev-login`);
+  expect(authRes.ok(), 'Dev login for E2E reset should succeed').toBe(true);
+
   // Clean up any budgets, transactions, and recurrences created by previous test runs
   const budgetsRes = await request.get(`${API_BASE}/budgets`);
   if (budgetsRes.ok()) {
@@ -51,6 +55,8 @@ test.describe('Lumo MVP Full-Stack E2E', () => {
       pageErrors.push(err.message);
     });
     await resetTestData(request);
+    const browserAuth = await page.request.post('/api/v1/auth/dev-login');
+    expect(browserAuth.ok(), 'Dev login for browser E2E context should succeed').toBe(true);
   });
 
   test.afterEach(() => {

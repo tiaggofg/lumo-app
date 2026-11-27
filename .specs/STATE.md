@@ -82,13 +82,20 @@
 - **Date**: 2026-11-26
 - **Status**: active
 
+### AD-011
+- **Decision**: Adotar **Google OAuth 2.0 (Authorization Code + PKCE S256 no backend Quarkus)** como provedor de autenticação de produção com **sessões próprias do Lumo** via cookies `HttpOnly; SameSite=Lax` (`lumo_access` JWT `HS256` de 15 min + `lumo_refresh` opaco rotativo de 30 dias armazenado apenas como hash `SHA-256` em `refresh_sessions`, `Secure=true` em `%prod`), validação criptográfica do `id_token` via JWKS RS256 do Google, variável opcional `LUMO_ALLOWED_EMAILS` (vazia por padrão, confiando nos *Test users* do Google Cloud), proteção transversal de `/api/v1/**` via `AuthRequestFilter` (`401` RFC 9457) e modo **Entrar como Dev** (`POST /api/v1/auth/dev-login`) estritamente restrito a `%dev`/`%test` (`404` em `%prod`).
+- **Reason**: Garantir custo zero (sem envio de e-mail/SMS/WhatsApp), zero exposição de tokens em `localStorage`, sessões estáveis de 30 dias mesmo com o app Google em modo *Testing*, desacoplamento do domínio (`AD-003`) e testes automatizados/Playwright 100% determinísticos sem dependência de rede externa.
+- **Trade-off**: Mantém workspace financeiro único compartilhado nesta entrega (isolamento multi-tenant por `Household` adiado para evolução futura) e exige `LUMO_AUTH_JWT_SECRET` (≥ 32 caracteres) e credenciais Google OAuth em `%prod`.
+- **Scope**: Projeto inteiro (`backend/`, `frontend/`, `docker-compose.yml`).
+- **Date**: 2026-11-27
+- **Status**: active
+
 ## Handoff
 
-- **Feature**: `03-zardui-brand-and-shell`
-- **Phase / Task**: Complete — `T1..T12` implementadas, verificadas (Vitest + Playwright E2E + SonarQube Quality Gate OK) e aprovadas pelo usuário (`2026-11-27`)
-- **Completed**: `01-lumo-mvp`, `02-ui-ux-overhaul` e `03-zardui-brand-and-shell` (`T1..T12`)
+- **Feature**: `04-google-oauth-auth`
+- **Phase / Task**: Verified & Ready for Approval — `T1..T12` concluídas, todas as suítes (Backend `./mvnw verify`, Frontend lint/build/Vitest, Playwright E2E desktop/mobile e SonarQube Quality Gate) passando `OK` e `docs/`/`README.md` sincronizados
+- **Completed**: `01-lumo-mvp`, `02-ui-ux-overhaul`, `03-zardui-brand-and-shell`, `04-google-oauth-auth` (`T1..T12` aguardando aprovação de commit/push)
 - **In-progress** (file:line): none
-- **Next step**: Iniciar próxima feature ou evolução da Fase 2 quando solicitado pelo usuário
+- **Next step**: Aguardar aprovação explícita do usuário para realizar `git add`, `git commit` (Conventional Commits) e `git push`
 - **Blockers**: none
-- **Uncommitted files**: none
 - **Branch**: main

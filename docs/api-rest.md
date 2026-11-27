@@ -9,6 +9,19 @@
 
 ## Endpoints
 
+### Autenticação (`/api/v1/auth`)
+> Todos os demais endpoints `/api/v1/**` e `GET /api/v1/auth/me` exigem o cookie `HttpOnly` `lumo_access` válido (retornando `401 Unauthorized` em `application/problem+json` quando ausente/expirado).
+
+| Método | Endpoint | Acesso | Descrição |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/v1/auth/providers` | Público | Retorna `{ googleEnabled, devLoginEnabled }` conforme perfil ativo |
+| `GET` | `/api/v1/auth/google/login` | Público | Gera `state` + PKCE `S256`, define `lumo_oauth_state` (5m) e redireciona `302` ao Google (`?returnUrl=`) |
+| `GET` | `/api/v1/auth/google/callback` | Público | Valida `state`, troca `code`, verifica `id_token` via JWKS, faz upsert de `User`, emite `lumo_access` + `lumo_refresh` e redireciona `302` |
+| `POST` | `/api/v1/auth/dev-login` | `%dev`/`%test` | Autentica usuário determinístico `dev@lumo.local` (`404` em `%prod`) |
+| `POST` | `/api/v1/auth/refresh` | Cookie `lumo_refresh` | Rotaciona atomicamente a sessão (30 dias) e reemite cookies (`200`, `401`) |
+| `POST` | `/api/v1/auth/logout` | Público | Revoga a `RefreshSession` atual e limpa `lumo_access` e `lumo_refresh` (`204`) |
+| `GET` | `/api/v1/auth/me` | Autenticado | Retorna `{ id, email, name, avatarUrl }` do usuário autenticado (`200`, `401`) |
+
 ### Catálogo
 | Método | Endpoint | Descrição |
 | :--- | :--- | :--- |
