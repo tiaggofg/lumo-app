@@ -1,7 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { ZConfirmService } from '../../shared/ui';
 import { CatalogPageComponent } from './catalog-page.component';
 import { CatalogStoreService } from './catalog-store.service';
 
@@ -10,18 +10,18 @@ describe('CatalogPageComponent', () => {
   let component: CatalogPageComponent;
   let store: CatalogStoreService;
   let httpMock: HttpTestingController;
-  let confirmationService: ConfirmationService;
+  let confirmService: ZConfirmService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [CatalogPageComponent],
-      providers: [provideHttpClient(), provideHttpClientTesting(), ConfirmationService, MessageService],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
     });
     fixture = TestBed.createComponent(CatalogPageComponent);
     component = fixture.componentInstance;
     store = TestBed.inject(CatalogStoreService);
     httpMock = TestBed.inject(HttpTestingController);
-    confirmationService = TestBed.inject(ConfirmationService);
+    confirmService = TestBed.inject(ZConfirmService);
   });
 
   afterEach(() => {
@@ -69,7 +69,7 @@ describe('CatalogPageComponent', () => {
     expect(toggleCatSpy).toHaveBeenCalledWith('c1', false);
 
     // Confirm delete category
-    const confirmSpy = vi.spyOn(confirmationService, 'confirm');
+    const confirmSpy = vi.spyOn(confirmService, 'confirm');
     component.confirmDeleteCategory(store.categories()[0]);
     expect(confirmSpy).toHaveBeenCalled();
 

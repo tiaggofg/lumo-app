@@ -1,13 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ConfirmationService, MessageService } from 'primeng/api';
-import { ButtonModule } from 'primeng/button';
-import { CheckboxModule } from 'primeng/checkbox';
-import { DialogModule } from 'primeng/dialog';
-import { InputNumberModule } from 'primeng/inputnumber';
-import { InputTextModule } from 'primeng/inputtext';
-import { SelectModule } from 'primeng/select';
-import { TextareaModule } from 'primeng/textarea';
 import {
   RecurrenceAmountType,
   RecurrenceType,
@@ -15,6 +7,17 @@ import {
   TransactionType,
 } from '../../core/models/api.models';
 import { BrlCurrencyPipe } from '../../shared/pipes/brl-currency.pipe';
+import {
+  ZButtonComponent,
+  ZCheckboxComponent,
+  ZConfirmService,
+  ZDialogComponent,
+  ZInputDirective,
+  ZInputNumberComponent,
+  ZSelectComponent,
+  ZTextareaDirective,
+  ZToastService,
+} from '../../shared/ui';
 import { CatalogStoreService } from '../catalog/catalog-store.service';
 import { RecurrencesStoreService } from './recurrences-store.service';
 
@@ -23,13 +26,13 @@ import { RecurrencesStoreService } from './recurrences-store.service';
   standalone: true,
   imports: [
     FormsModule,
-    ButtonModule,
-    CheckboxModule,
-    DialogModule,
-    InputNumberModule,
-    InputTextModule,
-    SelectModule,
-    TextareaModule,
+    ZButtonComponent,
+    ZCheckboxComponent,
+    ZDialogComponent,
+    ZInputNumberComponent,
+    ZInputDirective,
+    ZSelectComponent,
+    ZTextareaDirective,
     BrlCurrencyPipe,
   ],
   template: `
@@ -42,17 +45,17 @@ import { RecurrencesStoreService } from './recurrences-store.service';
           </p>
         </div>
 
-        <p-button
+        <z-button
           label="Nova Recorrência"
           icon="pi pi-plus"
           data-testid="new-recurrence-btn"
-          (onClick)="openFormDialog()"
+          (buttonClick)="openFormDialog()"
         />
       </div>
 
       <!-- Filter Bar -->
-      <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <p-select
+      <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-5 grid grid-cols-1 sm:grid-cols-3 gap-3 shadow-sm">
+        <z-select
           [ngModel]="store.filters().active"
           (ngModelChange)="store.updateFilters({ active: $event })"
           [options]="activeFilterOptions"
@@ -63,7 +66,7 @@ import { RecurrencesStoreService } from './recurrences-store.service';
           styleClass="w-full"
         />
 
-        <p-select
+        <z-select
           [ngModel]="store.filters().type"
           (ngModelChange)="store.updateFilters({ type: $event })"
           [options]="typeOptions"
@@ -74,7 +77,7 @@ import { RecurrencesStoreService } from './recurrences-store.service';
           styleClass="w-full"
         />
 
-        <p-select
+        <z-select
           [ngModel]="store.filters().recurrenceType"
           (ngModelChange)="store.updateFilters({ recurrenceType: $event })"
           [options]="recurrenceModeOptions"
@@ -88,18 +91,18 @@ import { RecurrencesStoreService } from './recurrences-store.service';
 
       <!-- Recurrence Cards -->
       @if (store.recurrences().length === 0) {
-        <div class="rounded-2xl bg-white dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-700 p-12 text-center space-y-3">
+        <div class="rounded-2xl bg-white dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-700 p-12 text-center space-y-3 shadow-sm">
           <p class="text-base text-slate-500 dark:text-slate-400">
             Nenhuma recorrência cadastrada ainda.
           </p>
-          <p-button label="Criar primeira recorrência" icon="pi pi-plus" (onClick)="openFormDialog()" />
+          <z-button label="Criar primeira recorrência" icon="pi pi-plus" (buttonClick)="openFormDialog()" />
         </div>
       } @else {
         <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-5">
           @for (rule of store.recurrences(); track rule.id) {
             <div
               [attr.data-testid]="'recurrence-card-' + rule.description"
-              class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 space-y-4 shadow-xs"
+              class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 space-y-4 shadow-sm"
               [class.opacity-60]="!rule.active"
             >
               <div class="flex items-start justify-between gap-3">
@@ -156,40 +159,36 @@ import { RecurrencesStoreService } from './recurrences-store.service';
               </div>
 
               <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-                <p-button
+                <z-button
                   label="Editar"
                   icon="pi pi-pencil"
-                  size="small"
-                  severity="secondary"
-                  [text]="true"
-                  (onClick)="openFormDialog(rule)"
+                  size="sm"
+                  variant="ghost"
+                  (buttonClick)="openFormDialog(rule)"
                 />
                 @if (rule.active) {
-                  <p-button
+                  <z-button
                     label="Desativar"
                     icon="pi pi-pause"
-                    size="small"
-                    severity="warn"
-                    [text]="true"
-                    (onClick)="openDeactivateDialog(rule)"
+                    size="sm"
+                    variant="warn"
+                    (buttonClick)="openDeactivateDialog(rule)"
                   />
                 } @else {
-                  <p-button
+                  <z-button
                     label="Reativar"
                     icon="pi pi-play"
-                    size="small"
-                    severity="success"
-                    [text]="true"
-                    (onClick)="activate(rule)"
+                    size="sm"
+                    variant="success"
+                    (buttonClick)="activate(rule)"
                   />
                 }
-                <p-button
+                <z-button
                   label="Excluir"
                   icon="pi pi-trash"
-                  size="small"
-                  severity="danger"
-                  [text]="true"
-                  (onClick)="confirmDelete(rule)"
+                  size="sm"
+                  variant="destructive"
+                  (buttonClick)="confirmDelete(rule)"
                 />
               </div>
             </div>
@@ -199,17 +198,16 @@ import { RecurrencesStoreService } from './recurrences-store.service';
     </div>
 
     <!-- Create/Edit Recurrence Dialog -->
-    <p-dialog
+    <z-dialog
       [header]="editingId() ? 'Editar Recorrência' : 'Nova Recorrência'"
       [(visible)]="formDialogVisible"
-      [modal]="true"
-      [style]="{ width: '34rem', maxWidth: '96vw' }"
+      widthClass="max-w-xl"
     >
-      <div class="space-y-4 pt-2">
+      <div class="space-y-4 pt-1">
         <div class="grid grid-cols-2 gap-3">
           <div class="flex flex-col gap-1.5">
             <label for="rec-type" class="text-sm font-medium">Tipo</label>
-            <p-select
+            <z-select
               inputId="rec-type"
               [(ngModel)]="form.type"
               (ngModelChange)="form.categoryId = null"
@@ -221,7 +219,7 @@ import { RecurrencesStoreService } from './recurrences-store.service';
           </div>
           <div class="flex flex-col gap-1.5">
             <label for="rec-amount-type" class="text-sm font-medium">Valor</label>
-            <p-select
+            <z-select
               inputId="rec-amount-type"
               [(ngModel)]="form.amountType"
               [options]="amountTypeOptions"
@@ -237,18 +235,17 @@ import { RecurrencesStoreService } from './recurrences-store.service';
           <input
             id="rec-desc"
             data-testid="rec-description-input"
-            pInputText
+            zInput
             [(ngModel)]="form.description"
             maxlength="140"
             placeholder="Ex.: Aluguel, Água, Dentista"
-            class="w-full"
           />
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div class="flex flex-col gap-1.5">
             <label for="rec-amount" class="text-sm font-medium">Valor padrão (R$)</label>
-            <p-inputnumber
+            <z-input-number
               inputId="rec-amount"
               data-testid="rec-amount-input"
               [(ngModel)]="form.amount"
@@ -261,7 +258,7 @@ import { RecurrencesStoreService } from './recurrences-store.service';
           </div>
           <div class="flex flex-col gap-1.5">
             <label for="rec-due-day" class="text-sm font-medium">Dia de vencimento (1..31)</label>
-            <p-inputnumber
+            <z-input-number
               inputId="rec-due-day"
               [(ngModel)]="form.dueDay"
               [min]="1"
@@ -276,7 +273,7 @@ import { RecurrencesStoreService } from './recurrences-store.service';
         <div class="grid grid-cols-2 gap-3">
           <div class="flex flex-col gap-1.5">
             <label for="rec-mode" class="text-sm font-medium">Modo</label>
-            <p-select
+            <z-select
               inputId="rec-mode"
               [(ngModel)]="form.recurrenceType"
               [options]="recurrenceModeOptions"
@@ -289,9 +286,9 @@ import { RecurrencesStoreService } from './recurrences-store.service';
             <label for="rec-start-month" class="text-sm font-medium">Mês de início</label>
             <input
               id="rec-start-month"
+              zInput
               type="month"
               [(ngModel)]="form.startMonth"
-              class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm"
             />
           </div>
         </div>
@@ -301,9 +298,9 @@ import { RecurrencesStoreService } from './recurrences-store.service';
             <label for="rec-end-month" class="text-sm font-medium">Mês de término (inclusivo)</label>
             <input
               id="rec-end-month"
+              zInput
               type="month"
               [(ngModel)]="form.endMonth"
-              class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm"
             />
           </div>
         }
@@ -312,7 +309,7 @@ import { RecurrencesStoreService } from './recurrences-store.service';
           <div class="grid grid-cols-2 gap-3">
             <div class="flex flex-col gap-1.5">
               <label for="rec-total-inst" class="text-sm font-medium">Total de parcelas</label>
-              <p-inputnumber
+              <z-input-number
                 inputId="rec-total-inst"
                 [(ngModel)]="form.totalInstallments"
                 [min]="2"
@@ -322,7 +319,7 @@ import { RecurrencesStoreService } from './recurrences-store.service';
             </div>
             <div class="flex flex-col gap-1.5">
               <label for="rec-start-inst" class="text-sm font-medium">Parcela inicial</label>
-              <p-inputnumber
+              <z-input-number
                 inputId="rec-start-inst"
                 [(ngModel)]="form.startingInstallment"
                 [min]="1"
@@ -337,7 +334,7 @@ import { RecurrencesStoreService } from './recurrences-store.service';
         <div class="grid grid-cols-2 gap-3">
           <div class="flex flex-col gap-1.5">
             <label for="rec-cat" class="text-sm font-medium">Categoria</label>
-            <p-select
+            <z-select
               inputId="rec-cat"
               [(ngModel)]="form.categoryId"
               [options]="availableCategories()"
@@ -350,7 +347,7 @@ import { RecurrencesStoreService } from './recurrences-store.service';
           </div>
           <div class="flex flex-col gap-1.5">
             <label for="rec-ben" class="text-sm font-medium">Beneficiário</label>
-            <p-select
+            <z-select
               inputId="rec-ben"
               [(ngModel)]="form.beneficiaryId"
               [options]="catalogStore.activeBeneficiaries()"
@@ -367,17 +364,16 @@ import { RecurrencesStoreService } from './recurrences-store.service';
           <label for="rec-notes" class="text-sm font-medium">Observações</label>
           <textarea
             id="rec-notes"
-            pTextarea
+            zTextarea
             [(ngModel)]="form.notes"
             rows="2"
             maxlength="500"
-            class="w-full"
           ></textarea>
         </div>
 
         @if (editingId()) {
-          <div class="flex items-center gap-2 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/70">
-            <p-checkbox
+          <div class="flex items-center gap-2 p-3 rounded-xl bg-slate-100/80 dark:bg-slate-800/70">
+            <z-checkbox
               inputId="propagate-open"
               [(ngModel)]="form.propagateToOpenTransactions"
               [binary]="true"
@@ -391,32 +387,31 @@ import { RecurrencesStoreService } from './recurrences-store.service';
 
       <ng-template #footer>
         <div class="flex justify-end gap-2">
-          <p-button label="Cancelar" severity="secondary" [text]="true" (onClick)="formDialogVisible = false" />
-          <p-button
+          <z-button label="Cancelar" variant="ghost" (buttonClick)="formDialogVisible = false" />
+          <z-button
             label="Salvar"
             data-testid="rec-save-btn"
             [loading]="saving()"
             [disabled]="!isFormValid()"
-            (onClick)="save()"
+            (buttonClick)="save()"
           />
         </div>
       </ng-template>
-    </p-dialog>
+    </z-dialog>
 
     <!-- Deactivate Dialog -->
-    <p-dialog
+    <z-dialog
       header="Desativar Recorrência"
       [(visible)]="deactivateDialogVisible"
-      [modal]="true"
-      [style]="{ width: '28rem', maxWidth: '95vw' }"
+      widthClass="max-w-md"
     >
       @if (deactivatingRule(); as rule) {
-        <div class="space-y-4 pt-2">
+        <div class="space-y-4 pt-1">
           <p class="text-sm text-slate-600 dark:text-slate-300">
             Desativar <strong>{{ rule.description }}</strong> impedirá que futuros orçamentos gerem novos lançamentos automaticamente.
           </p>
           <div class="flex items-center gap-2">
-            <p-checkbox
+            <z-checkbox
               inputId="remove-future-open"
               [(ngModel)]="removeFutureOpenTransactions"
               [binary]="true"
@@ -430,23 +425,23 @@ import { RecurrencesStoreService } from './recurrences-store.service';
 
       <ng-template #footer>
         <div class="flex justify-end gap-2">
-          <p-button label="Cancelar" severity="secondary" [text]="true" (onClick)="deactivateDialogVisible = false" />
-          <p-button
+          <z-button label="Cancelar" variant="ghost" (buttonClick)="deactivateDialogVisible = false" />
+          <z-button
             label="Desativar"
-            severity="warn"
+            variant="warn"
             data-testid="confirm-deactivate-btn"
-            (onClick)="confirmDeactivate()"
+            (buttonClick)="confirmDeactivate()"
           />
         </div>
       </ng-template>
-    </p-dialog>
+    </z-dialog>
   `,
 })
 export class RecurrencesPageComponent implements OnInit {
   readonly store = inject(RecurrencesStoreService);
   readonly catalogStore = inject(CatalogStoreService);
-  private readonly confirmationService = inject(ConfirmationService);
-  private readonly messageService = inject(MessageService);
+  private readonly confirmService = inject(ZConfirmService);
+  private readonly toastService = inject(ZToastService);
 
   readonly saving = signal(false);
   readonly editingId = signal<string | null>(null);
@@ -563,7 +558,7 @@ export class RecurrencesPageComponent implements OnInit {
       const id = this.editingId();
       if (id) {
         const res = await this.store.update(id, payload);
-        this.messageService.add({
+        this.toastService.add({
           severity: 'success',
           summary: 'Recorrência atualizada',
           detail:
@@ -573,7 +568,7 @@ export class RecurrencesPageComponent implements OnInit {
         });
       } else {
         const res = await this.store.create(payload);
-        this.messageService.add({
+        this.toastService.add({
           severity: 'success',
           summary: 'Recorrência criada',
           detail:
@@ -599,7 +594,7 @@ export class RecurrencesPageComponent implements OnInit {
     if (!rule) return;
     const res = await this.store.deactivate(rule.id, this.removeFutureOpenTransactions);
     this.deactivateDialogVisible = false;
-    this.messageService.add({
+    this.toastService.add({
       severity: 'info',
       summary: 'Recorrência desativada',
       detail:
@@ -611,20 +606,20 @@ export class RecurrencesPageComponent implements OnInit {
 
   async activate(rule: RecurringTransaction): Promise<void> {
     await this.store.activate(rule.id);
-    this.messageService.add({ severity: 'success', summary: 'Recorrência reativada' });
+    this.toastService.add({ severity: 'success', summary: 'Recorrência reativada' });
   }
 
   confirmDelete(rule: RecurringTransaction): void {
-    this.confirmationService.confirm({
+    this.confirmService.confirm({
       header: 'Excluir Recorrência',
       message: `Deseja excluir fisicamente "${rule.description}"? (Permitido apenas se nunca gerou lançamentos.)`,
       icon: 'pi pi-exclamation-triangle',
       acceptLabel: 'Excluir',
       rejectLabel: 'Cancelar',
-      acceptButtonStyleClass: 'p-button-danger',
+      variant: 'destructive',
       accept: () => {
         void this.store.delete(rule.id).then(() => {
-          this.messageService.add({ severity: 'success', summary: 'Recorrência excluída' });
+          this.toastService.add({ severity: 'success', summary: 'Recorrência excluída' });
         });
       },
     });

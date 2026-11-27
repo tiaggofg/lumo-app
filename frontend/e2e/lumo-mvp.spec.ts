@@ -63,16 +63,71 @@ test.describe('Lumo MVP Full-Stack E2E', () => {
     await expect(page).toHaveURL(/\/dashboard$/);
     await expect(page.getByTestId('dashboard-empty-state')).toBeVisible();
 
+    // Verify 100% absence of PrimeNG license banner
+    const bodyText = await page.locator('body').innerText();
+    expect(bodyText).not.toContain('Invalid PrimeUI License');
+
+    // Verify Lumo SVG brand assets (/favicon.svg & /site.webmanifest)
+    const favRes = await page.request.get('/favicon.svg');
+    expect(favRes.ok()).toBe(true);
+    expect(await favRes.text()).toContain('#4F46E5');
+
+    const manifestRes = await page.request.get('/site.webmanifest');
+    expect(manifestRes.ok()).toBe(true);
+    expect(await manifestRes.text()).toContain('Lumo');
+
+    const isDesktop = (page.viewportSize()?.width ?? 1440) >= 1024;
+    if (isDesktop) {
+      await expect(page.getByTestId('desktop-sidebar').getByTestId('lumo-logo')).toBeVisible();
+    } else {
+      await expect(page.locator('header').getByTestId('lumo-logo')).toBeVisible();
+    }
+
     const mainClass = await page.locator('main').getAttribute('class');
     expect(mainClass).toContain('w-full');
     expect(mainClass).not.toContain('max-w-7xl');
 
     const bodyStyle = await page.evaluate(() => {
       const style = window.getComputedStyle(document.body);
-      return { fontSize: style.fontSize, fontFamily: style.fontFamily };
+      return {
+        fontSize: style.fontSize,
+        fontFamily: style.fontFamily,
+        backgroundColor: style.backgroundColor,
+      };
     });
     expect(bodyStyle.fontSize).toBe('16px');
     expect(bodyStyle.fontFamily).toContain('Plus Jakarta Sans');
+    // Light mode canvas is slate-100 (#F1F5F9 -> rgb(241, 245, 249))
+    expect(bodyStyle.backgroundColor).toBe('rgb(241, 245, 249)');
+
+    if (isDesktop) {
+      const sidebar = page.getByTestId('desktop-sidebar');
+      await expect(sidebar).toBeVisible();
+
+      const sidebarBox = await sidebar.boundingBox();
+      expect(sidebarBox?.height).toBe(900);
+      expect(sidebarBox?.width).toBe(272);
+
+      const sidebarClass = await sidebar.getAttribute('class');
+      expect(sidebarClass).toContain('bg-slate-900');
+      expect(sidebarClass).toContain('h-dvh');
+      expect(sidebarClass).toContain('sticky');
+
+      // Collapse sidebar to icon-only rail (w-20 / 80px)
+      await page.getByTestId('sidebar-collapse-toggle').click();
+      await expect(sidebar).toHaveAttribute('data-collapsed', 'true');
+      await expect
+        .poll(async () => (await sidebar.boundingBox())?.width)
+        .toBe(80);
+
+      // Reload and confirm collapsed state persists from localStorage
+      await page.reload();
+      await expect(page.getByTestId('desktop-sidebar')).toHaveAttribute('data-collapsed', 'true');
+
+      // Expand sidebar back to w-68 (272px)
+      await page.getByTestId('sidebar-collapse-toggle').click();
+      await expect(page.getByTestId('desktop-sidebar')).toHaveAttribute('data-collapsed', 'false');
+    }
 
     const bodyHtml = await page.locator('body').innerHTML();
     expect(bodyHtml).not.toContain('emerald-');
@@ -84,6 +139,7 @@ test.describe('Lumo MVP Full-Stack E2E', () => {
   test('budgets list and create flow', async ({ page }) => {
     await page.goto('/budgets');
     await expect(page.getByTestId('budgets-empty-state')).toBeVisible();
+    expect(await page.locator('body').innerText()).not.toContain('Invalid PrimeUI License');
 
     await page.getByTestId('empty-create-budget-btn').click();
     await page.getByTestId('competence-month-input').fill('2026-11');
@@ -101,6 +157,7 @@ test.describe('Lumo MVP Full-Stack E2E', () => {
 
     await page.goto('/catalog');
     await expect(page.getByText('Moradia')).toBeVisible();
+    expect(await page.locator('body').innerText()).not.toContain('Invalid PrimeUI License');
 
     await page.getByTestId('new-category-btn').click();
     await page.locator('#cat-name').fill(catName);
@@ -136,6 +193,7 @@ test.describe('Lumo MVP Full-Stack E2E', () => {
 
     await page.goto('/recurrences');
     await expect(page.getByTestId(`recurrence-card-${aguaName}`)).toBeVisible();
+    expect(await page.locator('body').innerText()).not.toContain('Invalid PrimeUI License');
 
     await page.getByRole('button', { name: 'Nova Recorrência' }).click();
     await page.getByTestId('rec-description-input').fill(aluguelName);
@@ -205,6 +263,7 @@ test.describe('Lumo MVP Full-Stack E2E', () => {
     await expect(page.getByTestId('summary-planned-income')).toContainText('6.362,29');
     await expect(page.getByTestId('summary-planned-expense')).toContainText('980,00');
     await expect(page.getByTestId('summary-realized-expense')).toContainText('0,00');
+    expect(await page.locator('body').innerText()).not.toContain('Invalid PrimeUI License');
 
     // Charts must NOT be embedded in /budgets/:id; shortcut to /dashboard must be visible
     await expect(page.getByTestId('budget-charts')).toHaveCount(0);
@@ -316,14 +375,41 @@ test.describe('Lumo MVP Full-Stack E2E', () => {
 
     await page.goto('/dashboard');
     await expect(page.getByTestId('dashboard-kpi-cards')).toBeVisible();
+    await expect(page.getByTestId('z-chart-container')).toHaveCount(4);
     await expect(page.getByTestId('chart-category')).toBeVisible();
+    await expect(page.getByTestId('chart-category-center')).toContainText('1.600,00');
     await expect(page.getByTestId('chart-beneficiary')).toBeVisible();
     await expect(page.getByTestId('chart-status')).toBeVisible();
+    await expect(page.getByTestId('chart-status-center')).toContainText('75%');
     await expect(page.getByTestId('chart-evolution')).toBeVisible();
     await expect(page.getByTestId('category-breakdown-list')).toContainText('75%');
     await expect(page.getByTestId('category-breakdown-list')).toContainText('25%');
 
     const isDesktop = (page.viewportSize()?.width ?? 1440) >= 1024;
+    if (isDesktop) {
+      // Verify all 4 KPI cards on the row share the exact same height
+      const kpiCards = page.getByTestId('dashboard-kpi-cards').locator('> div');
+      const kpi0 = await kpiCards.nth(0).boundingBox();
+      const kpi3 = await kpiCards.nth(3).boundingBox();
+      expect(kpi0?.height).toBeGreaterThan(0);
+      expect(Math.abs((kpi0?.height ?? 0) - (kpi3?.height ?? 0))).toBeLessThanOrEqual(1);
+
+      // Verify left and right chart cards in each row share the exact same height
+      const chartCards = page.getByTestId('z-chart-container');
+      const chart0 = await chartCards.nth(0).boundingBox();
+      const chart1 = await chartCards.nth(1).boundingBox();
+      const chart2 = await chartCards.nth(2).boundingBox();
+      const chart3 = await chartCards.nth(3).boundingBox();
+      expect(Math.abs((chart0?.height ?? 0) - (chart1?.height ?? 0))).toBeLessThanOrEqual(1);
+      expect(Math.abs((chart2?.height ?? 0) - (chart3?.height ?? 0))).toBeLessThanOrEqual(1);
+    }
+
+    // Interactive legend pill click in ZardUI chart container
+    const incomeLegendBtn = page.getByTestId('z-chart-legend-item-income');
+    await expect(incomeLegendBtn).toHaveAttribute('aria-pressed', 'true');
+    await incomeLegendBtn.click();
+    await expect(incomeLegendBtn).toHaveAttribute('aria-pressed', 'false');
+
     const toggleBtn = page.getByTestId(isDesktop ? 'theme-toggle-desktop' : 'theme-toggle-mobile');
     await toggleBtn.click();
 

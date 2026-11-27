@@ -1,19 +1,29 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ConfirmationService, MessageService } from 'primeng/api';
-import { ButtonModule } from 'primeng/button';
-import { DialogModule } from 'primeng/dialog';
-import { InputTextModule } from 'primeng/inputtext';
 import { MonthlyBudgetListItem } from '../../core/models/api.models';
 import { BrlCurrencyPipe } from '../../shared/pipes/brl-currency.pipe';
 import { CompetenceMonthPipe } from '../../shared/pipes/competence-month.pipe';
+import {
+  ZButtonComponent,
+  ZConfirmService,
+  ZDialogComponent,
+  ZInputDirective,
+  ZToastService,
+} from '../../shared/ui';
 import { BudgetsStoreService } from './budgets-store.service';
 
 @Component({
   selector: 'app-budget-list-page',
   standalone: true,
-  imports: [FormsModule, ButtonModule, DialogModule, InputTextModule, BrlCurrencyPipe, CompetenceMonthPipe],
+  imports: [
+    FormsModule,
+    ZButtonComponent,
+    ZDialogComponent,
+    ZInputDirective,
+    BrlCurrencyPipe,
+    CompetenceMonthPipe,
+  ],
   template: `
     <div class="space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -24,27 +34,27 @@ import { BudgetsStoreService } from './budgets-store.service';
           </p>
         </div>
 
-        <p-button
+        <z-button
           label="Novo Orçamento"
           icon="pi pi-plus"
           data-testid="new-budget-btn"
-          (onClick)="openCreateDialog()"
+          (buttonClick)="openCreateDialog()"
         />
       </div>
 
       @if (store.loadingList() && store.budgets().length === 0) {
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5">
           @for (n of [1, 2, 3, 4]; track n) {
-            <div class="h-52 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 animate-pulse"></div>
+            <div class="h-52 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 animate-pulse"></div>
           }
         </div>
       } @else if (store.budgets().length === 0) {
         <div
           data-testid="budgets-empty-state"
-          class="rounded-2xl bg-white dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-700 p-12 text-center space-y-4"
+          class="rounded-2xl bg-white dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-700 p-12 text-center space-y-4 shadow-sm"
         >
           <div class="w-16 h-16 mx-auto rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
-            <i class="pi pi-calendar-plus text-2xl"></i>
+            <i class="pi pi-calendar-plus text-2xl" aria-hidden="true"></i>
           </div>
           <div class="space-y-1.5">
             <h2 class="text-xl font-bold">Nenhum orçamento mensal criado</h2>
@@ -52,11 +62,11 @@ import { BudgetsStoreService } from './budgets-store.service';
               Crie o orçamento do mês atual para começar a controlar receitas, despesas e recorrências automaticamente.
             </p>
           </div>
-          <p-button
+          <z-button
             label="Criar primeiro orçamento"
             icon="pi pi-plus"
             data-testid="empty-create-budget-btn"
-            (onClick)="openCreateDialog()"
+            (buttonClick)="openCreateDialog()"
           />
         </div>
       } @else {
@@ -65,7 +75,7 @@ import { BudgetsStoreService } from './budgets-store.service';
             <div
               [attr.data-testid]="'budget-card-' + budget.competenceMonth"
               (click)="openBudget(budget.id)"
-              class="group rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-indigo-500 dark:hover:border-indigo-500 p-6 shadow-xs transition-all cursor-pointer space-y-5"
+              class="group rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 hover:border-indigo-500 dark:hover:border-indigo-500 p-6 shadow-sm transition-all cursor-pointer space-y-5"
             >
               <div class="flex items-start justify-between gap-2">
                 <div>
@@ -84,7 +94,7 @@ import { BudgetsStoreService } from './budgets-store.service';
                   title="Excluir orçamento"
                   aria-label="Excluir orçamento"
                 >
-                  <i class="pi pi-trash text-sm"></i>
+                  <i class="pi pi-trash text-sm" aria-hidden="true"></i>
                 </button>
               </div>
 
@@ -137,21 +147,20 @@ import { BudgetsStoreService } from './budgets-store.service';
       }
     </div>
 
-    <p-dialog
+    <z-dialog
       header="Novo Orçamento Mensal"
       [(visible)]="createDialogVisible"
-      [modal]="true"
-      [style]="{ width: '24rem', maxWidth: '95vw' }"
+      widthClass="max-w-md"
     >
-      <div class="space-y-3 pt-2">
+      <div class="space-y-3 pt-1">
         <div class="flex flex-col gap-1.5">
           <label for="competence-month" class="text-sm font-medium">Competência (Mês/Ano)</label>
           <input
             id="competence-month"
+            zInput
             data-testid="competence-month-input"
             type="month"
             [(ngModel)]="newCompetenceMonth"
-            class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm"
           />
           <p class="text-xs text-slate-500 dark:text-slate-400">
             Todas as recorrências ativas elegíveis para este mês serão materializadas automaticamente.
@@ -161,24 +170,24 @@ import { BudgetsStoreService } from './budgets-store.service';
 
       <ng-template #footer>
         <div class="flex justify-end gap-2">
-          <p-button label="Cancelar" severity="secondary" [text]="true" (onClick)="createDialogVisible = false" />
-          <p-button
+          <z-button label="Cancelar" variant="ghost" (buttonClick)="createDialogVisible = false" />
+          <z-button
             label="Criar Orçamento"
             data-testid="confirm-create-budget-btn"
             [loading]="creating()"
             [disabled]="!isValidCompetenceMonth()"
-            (onClick)="createBudget()"
+            (buttonClick)="createBudget()"
           />
         </div>
       </ng-template>
-    </p-dialog>
+    </z-dialog>
   `,
 })
 export class BudgetListPageComponent implements OnInit {
   readonly store = inject(BudgetsStoreService);
   private readonly router = inject(Router);
-  private readonly confirmationService = inject(ConfirmationService);
-  private readonly messageService = inject(MessageService);
+  private readonly confirmService = inject(ZConfirmService);
+  private readonly toastService = inject(ZToastService);
 
   readonly creating = signal(false);
   createDialogVisible = false;
@@ -207,7 +216,7 @@ export class BudgetListPageComponent implements OnInit {
         created.materializedCount > 0
           ? `Orçamento criado com ${created.materializedCount} recorrência(s) materializada(s).`
           : 'Orçamento mensal criado com sucesso.';
-      this.messageService.add({ severity: 'success', summary: 'Orçamento criado', detail: msg });
+      this.toastService.add({ severity: 'success', summary: 'Orçamento criado', detail: msg });
       await this.router.navigate(['/budgets', created.id]);
     } finally {
       this.creating.set(false);
@@ -220,16 +229,16 @@ export class BudgetListPageComponent implements OnInit {
 
   confirmDelete(event: Event, budget: MonthlyBudgetListItem): void {
     event.stopPropagation();
-    this.confirmationService.confirm({
+    this.confirmService.confirm({
       header: 'Excluir Orçamento',
       message: `Deseja excluir o orçamento de ${budget.competenceMonth}? (Orçamentos com lançamentos não podem ser excluídos.)`,
       icon: 'pi pi-exclamation-triangle',
       acceptLabel: 'Excluir',
       rejectLabel: 'Cancelar',
-      acceptButtonStyleClass: 'p-button-danger',
+      variant: 'destructive',
       accept: () => {
         void this.store.deleteBudget(budget.id).then(() => {
-          this.messageService.add({ severity: 'success', summary: 'Orçamento excluído' });
+          this.toastService.add({ severity: 'success', summary: 'Orçamento excluído' });
         });
       },
     });

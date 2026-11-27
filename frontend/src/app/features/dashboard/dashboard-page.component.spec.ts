@@ -201,17 +201,85 @@ describe('DashboardPageComponent', () => {
     expect(benBreakdown).toHaveLength(2);
     expect(benBreakdown[0].resolvedColor).not.toBe(benBreakdown[1].resolvedColor);
 
-    // KPIs & chart canvases rendered
+    // KPIs & chart canvases rendered inside <z-chart-container>
+    expect(fixture.nativeElement.querySelectorAll('z-chart-container')).toHaveLength(4);
     expect(fixture.nativeElement.querySelector('[data-testid="dashboard-open-budget-btn"]')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('[data-testid="chart-category"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[data-testid="chart-category-center"]')?.textContent).toContain('Total Previsto');
     expect(fixture.nativeElement.querySelector('[data-testid="chart-beneficiary"]')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('[data-testid="chart-status"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[data-testid="chart-status-center"]')?.textContent).toContain('50%');
     expect(fixture.nativeElement.querySelector('[data-testid="chart-evolution"]')).toBeTruthy();
     expect(fixture.nativeElement.innerHTML).not.toContain('emerald-');
+
+    // Interactive legend toggles on ZardUI chart containers
+    component.toggleCategorySlice('Moradia');
+    expect(component.hiddenCategories().has('Moradia')).toBe(true);
+    component.toggleCategorySlice('Moradia');
+    expect(component.hiddenCategories().has('Moradia')).toBe(false);
+
+    component.toggleBeneficiarySeries('planned');
+    expect(component.hiddenBeneficiarySeries().has('planned')).toBe(true);
+
+    component.toggleStatusSlice('settled');
+    expect(component.hiddenStatusSlices().has('settled')).toBe(true);
+
+    component.toggleEvolutionSeries('income');
+    expect(component.hiddenEvolutionSeries().has('income')).toBe(true);
 
     // Switch competence month
     await component.onBudgetChange('b-nov');
     expect(component.selectedBudgetId()).toBe('b-nov');
     expect(loadDetailSpy).toHaveBeenCalledWith('b-nov');
+  });
+
+  it('should render empty category and beneficiary chart states when budget has no expenses', async () => {
+    const emptyDetail: MonthlyBudgetDetail = {
+      id: 'b-empty',
+      competenceMonth: '2026-11',
+      summary: {
+        plannedIncome: 0,
+        realizedIncome: 0,
+        plannedExpense: 0,
+        realizedExpense: 0,
+        plannedBalance: 0,
+        realizedBalance: 0,
+      },
+      statusCounts: { settled: 0, pending: 0, estimated: 0 },
+      expensesByCategory: [],
+      expensesByBeneficiary: [],
+      createdAt: '',
+      updatedAt: '',
+    };
+
+    vi.spyOn(store, 'loadBudgets').mockImplementation(async () => {
+      store.budgets.set([
+        {
+          id: 'b-empty',
+          competenceMonth: '2026-11',
+          transactionCount: 0,
+          summary: emptyDetail.summary,
+          createdAt: '',
+          updatedAt: '',
+        },
+      ]);
+    });
+    vi.spyOn(store, 'loadBudgetDetail').mockImplementation(async () => {
+      store.currentDetail.set(emptyDetail);
+    });
+
+    fixture.detectChanges();
+    await Promise.resolve();
+    await Promise.resolve();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[data-testid="empty-chart-category"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[data-testid="empty-chart-beneficiary"]')).toBeTruthy();
+  });
+
+  it('should ignore null or empty budgetId in onBudgetChange', async () => {
+    const loadSpy = vi.spyOn(store, 'loadBudgetDetail');
+    await component.onBudgetChange(null);
+    expect(loadSpy).not.toHaveBeenCalled();
   });
 });

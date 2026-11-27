@@ -2,11 +2,6 @@ import { DatePipe } from '@angular/common';
 import { Component, OnInit, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { ConfirmationService, MessageService } from 'primeng/api';
-import { ButtonModule } from 'primeng/button';
-import { InputTextModule } from 'primeng/inputtext';
-import { SelectModule } from 'primeng/select';
-import { TooltipModule } from 'primeng/tooltip';
 import {
   ConfirmEstimatePayload,
   Transaction,
@@ -17,6 +12,14 @@ import {
 import { TransactionStatusBadgeComponent } from '../../shared/components/transaction-status-badge.component';
 import { BrlCurrencyPipe } from '../../shared/pipes/brl-currency.pipe';
 import { CompetenceMonthPipe } from '../../shared/pipes/competence-month.pipe';
+import {
+  ZButtonComponent,
+  ZConfirmService,
+  ZInputDirective,
+  ZSelectComponent,
+  ZToastService,
+  ZTooltipDirective,
+} from '../../shared/ui';
 import { CatalogStoreService } from '../catalog/catalog-store.service';
 import { BudgetsStoreService } from './budgets-store.service';
 import { ConfirmEstimateDialogComponent } from './confirm-estimate-dialog.component';
@@ -29,10 +32,10 @@ import { TransactionFormDrawerComponent } from './transaction-form-drawer.compon
     DatePipe,
     FormsModule,
     RouterLink,
-    ButtonModule,
-    InputTextModule,
-    SelectModule,
-    TooltipModule,
+    ZButtonComponent,
+    ZInputDirective,
+    ZSelectComponent,
+    ZTooltipDirective,
     BrlCurrencyPipe,
     CompetenceMonthPipe,
     TransactionStatusBadgeComponent,
@@ -49,7 +52,7 @@ import { TransactionFormDrawerComponent } from './transaction-form-drawer.compon
             class="p-2.5 rounded-xl text-slate-500 hover:bg-slate-200/70 dark:hover:bg-slate-800 transition-colors"
             aria-label="Voltar para orçamentos"
           >
-            <i class="pi pi-arrow-left text-base"></i>
+            <i class="pi pi-arrow-left text-base" aria-hidden="true"></i>
           </a>
           <div>
             <p class="text-xs font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
@@ -73,34 +76,34 @@ import { TransactionFormDrawerComponent } from './transaction-form-drawer.compon
               data-testid="open-dashboard-charts-btn"
               class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-indigo-200 dark:border-indigo-800/70 bg-indigo-50/70 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-[15px] font-semibold transition-colors"
             >
-              <i class="pi pi-chart-pie text-sm"></i>
+              <i class="pi pi-chart-pie text-sm" aria-hidden="true"></i>
               <span>Ver Gráficos no Dashboard</span>
             </a>
           }
-          <p-button
+          <z-button
             label="Novo Lançamento"
             icon="pi pi-plus"
             data-testid="new-transaction-btn"
-            (onClick)="openCreateDrawer()"
+            (buttonClick)="openCreateDrawer()"
           />
         </div>
       </div>
 
       <!-- Summary Cards -->
       @if (detail(); as d) {
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-5" data-testid="budget-summary-cards">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch" data-testid="budget-summary-cards">
           <!-- Receitas -->
-          <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 space-y-2.5 shadow-xs">
+          <div class="h-full flex flex-col justify-between rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 space-y-2.5 shadow-sm">
             <div class="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               <span>RECEITAS</span>
               <span class="w-8 h-8 rounded-lg bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 inline-flex items-center justify-center">
-                <i class="pi pi-arrow-down-left text-sm"></i>
+                <i class="pi pi-arrow-down-left text-sm" aria-hidden="true"></i>
               </span>
             </div>
             <div class="text-3xl font-extrabold text-sky-600 dark:text-sky-400 tabular-nums" data-testid="summary-planned-income">
               {{ d.summary.plannedIncome | brlCurrency }}
             </div>
-            <div class="text-sm text-slate-500 dark:text-slate-400 flex justify-between pt-1 border-t border-slate-100 dark:border-slate-800/80">
+            <div class="text-sm text-slate-500 dark:text-slate-400 flex justify-between pt-2 border-t border-slate-100 dark:border-slate-800/80">
               <span>Realizado (Recebido)</span>
               <span class="font-semibold text-slate-800 dark:text-slate-200 tabular-nums" data-testid="summary-realized-income">
                 {{ d.summary.realizedIncome | brlCurrency }}
@@ -109,17 +112,17 @@ import { TransactionFormDrawerComponent } from './transaction-form-drawer.compon
           </div>
 
           <!-- Despesas -->
-          <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 space-y-2.5 shadow-xs">
+          <div class="h-full flex flex-col justify-between rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 space-y-2.5 shadow-sm">
             <div class="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               <span>DESPESAS</span>
               <span class="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 inline-flex items-center justify-center">
-                <i class="pi pi-arrow-up-right text-sm"></i>
+                <i class="pi pi-arrow-up-right text-sm" aria-hidden="true"></i>
               </span>
             </div>
             <div class="text-3xl font-extrabold text-rose-600 dark:text-rose-400 tabular-nums" data-testid="summary-planned-expense">
               {{ d.summary.plannedExpense | brlCurrency }}
             </div>
-            <div class="text-sm text-slate-500 dark:text-slate-400 flex justify-between pt-1 border-t border-slate-100 dark:border-slate-800/80">
+            <div class="text-sm text-slate-500 dark:text-slate-400 flex justify-between pt-2 border-t border-slate-100 dark:border-slate-800/80">
               <span>Realizado (Pago)</span>
               <span class="font-semibold text-slate-800 dark:text-slate-200 tabular-nums" data-testid="summary-realized-expense">
                 {{ d.summary.realizedExpense | brlCurrency }}
@@ -139,11 +142,11 @@ import { TransactionFormDrawerComponent } from './transaction-form-drawer.compon
           </div>
 
           <!-- Saldo -->
-          <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 space-y-2.5 shadow-xs">
+          <div class="h-full flex flex-col justify-between rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 space-y-2.5 shadow-sm">
             <div class="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               <span>SALDO DO MÊS</span>
               <span class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 inline-flex items-center justify-center">
-                <i class="pi pi-chart-line text-sm"></i>
+                <i class="pi pi-chart-line text-sm" aria-hidden="true"></i>
               </span>
             </div>
             <div
@@ -153,7 +156,7 @@ import { TransactionFormDrawerComponent } from './transaction-form-drawer.compon
             >
               {{ d.summary.plannedBalance | brlCurrency }}
             </div>
-            <div class="text-sm text-slate-500 dark:text-slate-400 flex justify-between pt-1 border-t border-slate-100 dark:border-slate-800/80">
+            <div class="text-sm text-slate-500 dark:text-slate-400 flex justify-between pt-2 border-t border-slate-100 dark:border-slate-800/80">
               <span>Saldo Realizado</span>
               <span class="font-semibold text-slate-800 dark:text-slate-200 tabular-nums" data-testid="summary-realized-balance">
                 {{ d.summary.realizedBalance | brlCurrency }}
@@ -164,7 +167,7 @@ import { TransactionFormDrawerComponent } from './transaction-form-drawer.compon
       }
 
       <!-- Tabs & Filters -->
-      <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 space-y-4">
+      <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-5 space-y-4 shadow-sm">
         <div class="flex flex-wrap items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3.5">
           @for (tab of typeTabs; track tab.label) {
             <button
@@ -185,15 +188,14 @@ import { TransactionFormDrawerComponent } from './transaction-form-drawer.compon
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           <input
-            pInputText
+            zInput
             data-testid="filter-search"
             [ngModel]="store.filters().search"
             (ngModelChange)="onFilterChange({ search: $event })"
             placeholder="Buscar descrição ou obs..."
-            class="w-full text-[15px]"
           />
 
-          <p-select
+          <z-select
             [ngModel]="store.filters().status"
             (ngModelChange)="onFilterChange({ status: $event })"
             [options]="statusFilterOptions"
@@ -204,7 +206,7 @@ import { TransactionFormDrawerComponent } from './transaction-form-drawer.compon
             styleClass="w-full"
           />
 
-          <p-select
+          <z-select
             [ngModel]="store.filters().categoryId"
             (ngModelChange)="onFilterChange({ categoryId: $event })"
             [options]="catalogStore.categories()"
@@ -215,7 +217,7 @@ import { TransactionFormDrawerComponent } from './transaction-form-drawer.compon
             styleClass="w-full"
           />
 
-          <p-select
+          <z-select
             [ngModel]="store.filters().beneficiaryId"
             (ngModelChange)="onFilterChange({ beneficiaryId: $event })"
             [options]="catalogStore.beneficiaries()"
@@ -226,38 +228,36 @@ import { TransactionFormDrawerComponent } from './transaction-form-drawer.compon
             styleClass="w-full"
           />
 
-          <p-button
+          <z-button
             label="Limpar filtros"
             icon="pi pi-filter-slash"
-            severity="secondary"
-            [outlined]="true"
+            variant="outline"
             styleClass="w-full"
-            (onClick)="clearFilters()"
+            (buttonClick)="clearFilters()"
           />
         </div>
       </div>
 
       <!-- Transactions List -->
       @if (store.transactions().length === 0) {
-        <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-12 text-center text-base text-slate-500 dark:text-slate-400">
+        <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-12 text-center text-base text-slate-500 dark:text-slate-400 shadow-sm">
           Nenhum lançamento encontrado para os filtros selecionados.
         </div>
       } @else {
         <!-- Desktop Table (>= 1024px) -->
-        <div class="hidden lg:block rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-x-auto">
+        <div class="hidden lg:block rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 overflow-x-auto shadow-sm">
           <table class="w-full text-[15px] text-left" data-testid="transactions-table">
-            <thead class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800">
+            <thead class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 bg-slate-100/80 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800">
               <tr>
                 <th class="px-5 py-4">
                   <span
                     class="inline-flex items-center gap-1.5 cursor-help"
-                    pTooltip="Clique no status de qualquer lançamento para alternar entre Pendente e Pago/Recebido"
-                    data-tooltip="Clique no status de qualquer lançamento para alternar entre Pendente e Pago/Recebido"
+                    zTooltip="Clique no status de qualquer lançamento para alternar entre Pendente e Pago/Recebido"
                     tooltipPosition="top"
                     data-testid="status-column-header"
                   >
                     <span>Status</span>
-                    <i class="pi pi-info-circle text-indigo-500 text-xs"></i>
+                    <i class="pi pi-info-circle text-indigo-500 text-xs" aria-hidden="true"></i>
                   </span>
                 </th>
                 <th class="px-5 py-4">Descrição</th>
@@ -276,9 +276,8 @@ import { TransactionFormDrawerComponent } from './transaction-form-drawer.compon
                       [attr.data-testid]="'toggle-status-' + txn.description"
                       (click)="toggleSettle(txn)"
                       class="cursor-pointer transition-transform active:scale-95"
-                      [pTooltip]="statusTooltip(txn)"
+                      [zTooltip]="statusTooltip(txn)"
                       tooltipPosition="top"
-                      [attr.data-tooltip]="statusTooltip(txn)"
                       [title]="statusTooltip(txn)"
                     >
                       <app-transaction-status-badge [status]="txn.status" [type]="txn.type" />
@@ -350,7 +349,7 @@ import { TransactionFormDrawerComponent } from './transaction-form-drawer.compon
                       class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
                       aria-label="Editar lançamento"
                     >
-                      <i class="pi pi-pencil text-sm"></i>
+                      <i class="pi pi-pencil text-sm" aria-hidden="true"></i>
                     </button>
                     <button
                       type="button"
@@ -358,7 +357,7 @@ import { TransactionFormDrawerComponent } from './transaction-form-drawer.compon
                       class="p-2 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer"
                       aria-label="Excluir lançamento"
                     >
-                      <i class="pi pi-trash text-sm"></i>
+                      <i class="pi pi-trash text-sm" aria-hidden="true"></i>
                     </button>
                   </td>
                 </tr>
@@ -370,7 +369,7 @@ import { TransactionFormDrawerComponent } from './transaction-form-drawer.compon
         <!-- Mobile Stacked Cards (< 1024px) -->
         <div class="lg:hidden space-y-3" data-testid="transactions-mobile-cards">
           @for (txn of store.transactions(); track txn.id) {
-            <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 space-y-3">
+            <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-4 space-y-3 shadow-sm">
               <div class="flex items-start justify-between gap-2">
                 <div class="min-w-0">
                   <div class="flex items-center gap-1.5 font-semibold text-[15px]">
@@ -406,9 +405,8 @@ import { TransactionFormDrawerComponent } from './transaction-form-drawer.compon
                     type="button"
                     (click)="toggleSettle(txn)"
                     class="cursor-pointer"
-                    [pTooltip]="statusTooltip(txn)"
+                    [zTooltip]="statusTooltip(txn)"
                     tooltipPosition="top"
-                    [attr.data-tooltip]="statusTooltip(txn)"
                   >
                     <app-transaction-status-badge [status]="txn.status" [type]="txn.type" />
                   </button>
@@ -430,7 +428,7 @@ import { TransactionFormDrawerComponent } from './transaction-form-drawer.compon
                     class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
                     aria-label="Editar lançamento"
                   >
-                    <i class="pi pi-pencil text-sm"></i>
+                    <i class="pi pi-pencil text-sm" aria-hidden="true"></i>
                   </button>
                   <button
                     type="button"
@@ -438,7 +436,7 @@ import { TransactionFormDrawerComponent } from './transaction-form-drawer.compon
                     class="p-2 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40"
                     aria-label="Excluir lançamento"
                   >
-                    <i class="pi pi-trash text-sm"></i>
+                    <i class="pi pi-trash text-sm" aria-hidden="true"></i>
                   </button>
                 </div>
               </div>
@@ -467,8 +465,8 @@ export class BudgetDetailPageComponent implements OnInit {
   readonly id = input.required<string>();
   readonly store = inject(BudgetsStoreService);
   readonly catalogStore = inject(CatalogStoreService);
-  private readonly confirmationService = inject(ConfirmationService);
-  private readonly messageService = inject(MessageService);
+  private readonly confirmService = inject(ZConfirmService);
+  private readonly toastService = inject(ZToastService);
 
   readonly detail = this.store.currentDetail;
   readonly drawerVisible = signal(false);
@@ -512,8 +510,8 @@ export class BudgetDetailPageComponent implements OnInit {
     void this.store.updateFilters(this.id(), { type });
   }
 
-  onFilterChange(partial: Partial<{ status: TransactionStatus | null; categoryId: string | null; beneficiaryId: string | null; search: string }>): void {
-    void this.store.updateFilters(this.id(), partial);
+  onFilterChange(partial: Partial<{ status: unknown; categoryId: unknown; beneficiaryId: unknown; search: string }>): void {
+    void this.store.updateFilters(this.id(), partial as Partial<{ status: TransactionStatus | null; categoryId: string | null; beneficiaryId: string | null; search: string }>);
   }
 
   clearFilters(): void {
@@ -534,10 +532,10 @@ export class BudgetDetailPageComponent implements OnInit {
     const editing = this.editingTransaction();
     if (editing) {
       await this.store.updateTransaction(this.id(), editing.id, payload);
-      this.messageService.add({ severity: 'success', summary: 'Lançamento atualizado' });
+      this.toastService.add({ severity: 'success', summary: 'Lançamento atualizado' });
     } else {
       await this.store.createTransaction(this.id(), payload);
-      this.messageService.add({ severity: 'success', summary: 'Lançamento criado' });
+      this.toastService.add({ severity: 'success', summary: 'Lançamento criado' });
     }
     this.drawerVisible.set(false);
   }
@@ -557,23 +555,23 @@ export class BudgetDetailPageComponent implements OnInit {
     if (!txn) return;
     await this.store.confirmEstimate(this.id(), txn.id, payload);
     this.confirmEstimateVisible.set(false);
-    this.messageService.add({ severity: 'success', summary: 'Valor confirmado' });
+    this.toastService.add({ severity: 'success', summary: 'Valor confirmado' });
   }
 
   confirmDeleteTransaction(txn: Transaction): void {
     const extra = txn.sourceRecurringTransactionId
       ? ' Como este lançamento veio de uma recorrência, ele não será recriado automaticamente neste mês.'
       : '';
-    this.confirmationService.confirm({
+    this.confirmService.confirm({
       header: 'Excluir Lançamento',
       message: `Deseja excluir "${txn.description}"?${extra}`,
       icon: 'pi pi-exclamation-triangle',
       acceptLabel: 'Excluir',
       rejectLabel: 'Cancelar',
-      acceptButtonStyleClass: 'p-button-danger',
+      variant: 'destructive',
       accept: () => {
         void this.store.deleteTransaction(this.id(), txn.id).then(() => {
-          this.messageService.add({ severity: 'success', summary: 'Lançamento excluído' });
+          this.toastService.add({ severity: 'success', summary: 'Lançamento excluído' });
         });
       },
     });

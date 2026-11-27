@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" fill="none">
+  <defs>
+    <linearGradient id="lumo-bg-grad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#4F46E5" />
+      <stop offset="55%" stop-color="#3B82F6" />
+      <stop offset="100%" stop-color="#0284C7" />
+    </linearGradient>
+    <linearGradient id="lumo-beam-grad" x1="20" y1="6" x2="20" y2="30" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#BAE6FD" />
+    </linearGradient>
+  </defs>
+  <rect width="40" height="40" rx="11" fill="url(#lumo-bg-grad)" />
+  <path d="M9 27.5L20 33.5L31 27.5L27.2 24.8L20 28.8L12.8 24.8L9 27.5Z" fill="#BAE6FD" fill-opacity="0.38" />
+  <path d="M11 22L20 27.5L29 22L25.5 19.6L20 22.9L14.5 19.6L11 22Z" fill="#E0F2FE" fill-opacity="0.62" />
+  <path d="M20 6.5L28.5 16.5L20 22.2L11.5 16.5L20 6.5Z" fill="url(#lumo-beam-grad)" />
+  <path d="M20 6.5L28.5 16.5L20 22.2V6.5Z" fill="#FFFFFF" fill-opacity="0.32" />
+</svg>

@@ -14,11 +14,11 @@ export default tseslint.config(
     rules: {
       '@angular-eslint/directive-selector': [
         'error',
-        { type: 'attribute', prefix: 'app', style: 'camelCase' },
+        { type: 'attribute', prefix: ['app', 'z'], style: 'camelCase' },
       ],
       '@angular-eslint/component-selector': [
         'error',
-        { type: 'element', prefix: 'app', style: 'kebab-case' },
+        { type: 'element', prefix: ['app', 'z'], style: 'kebab-case' },
       ],
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     },

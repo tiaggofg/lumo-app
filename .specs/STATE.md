@@ -64,7 +64,7 @@
 - **Trade-off**: Verificar termos de licença de componentes específicos do PrimeNG v22 durante setup, restringindo uso a componentes gratuitos/MIT ou Tailwind/CDK se algum componente exigir licença comercial.
 - **Scope**: `frontend/`.
 - **Date**: 2026-11-26
-- **Status**: active
+- **Status**: superseded by AD-010
 
 ### AD-009
 - **Decision**: Adotar a identidade visual **Royal Indigo (`#4F46E5`) & Azul Safira (`#0284C7`)** (100% sem verde) com preset PrimeNG Aura customizado para `indigo`, tipografia ampliada (**Plus Jakarta Sans** + **JetBrains Mono** com `15px–16px` nas tabelas e `30px–36px` nos KPIs), layout fluido em tela cheia (`w-full` sem `max-w-7xl`), cabeçalho `"Status"` com `pTooltip` no orçamento mensal e página dedicada de **Dashboard (`/dashboard`)** como rota padrão com gráficos multicoloridos e evolução mensal.
@@ -74,13 +74,21 @@
 - **Date**: 2026-11-26
 - **Status**: active
 
+### AD-010
+- **Decision**: Substituir completamente o `primeng` e `@primeuix/themes` por uma suíte própria de componentes **ZardUI (estilo shadcn/ui para Angular v22 — 100% MIT, com Tailwind CSS v4 + Signals)** em `frontend/src/app/shared/ui/` (`z-button`, `z-dialog`, `z-confirm-dialog`, `z-toast-viewport`, `z-select`, `z-input`, `z-input-number`, `z-checkbox`, `z-textarea`, `z-tooltip`, `z-badge`, `z-chart-container`), adotar **Dark Sidebar (`slate-900`)** no Light Mode com fundo de página `slate-100` (`#F1F5F9`) e sidebar desktop fixa (`h-dvh sticky top-0`) com modo recolhido (`w-20`) persistido em `localStorage`, e estabelecer a identidade de marca vetorial **Lumo ("Prisma de Luz & Camadas")** em `<app-lumo-logo>` e favicons.
+- **Reason**: Eliminar definitivamente o aviso de licença proprietária `"Invalid PrimeUI License"` do PrimeNG v22, alinhar formulários, modais e gráficos ao padrão visual shadcn/ZardUI, aumentar a profundidade visual no Light Mode e corrigir o comportamento de scroll e colapso da sidebar.
+- **Trade-off**: Mantém os primitivos de UI (`shared/ui/`) dentro do próprio repositório (modelo copy-paste/own-your-components do ZardUI/shadcn), exigindo testes unitários dedicados para os componentes base em troca de controle total e zero dependências proprietárias.
+- **Scope**: `frontend/`.
+- **Date**: 2026-11-26
+- **Status**: active
+
 ## Handoff
 
-- **Feature**: `02-ui-ux-overhaul`
-- **Phase / Task**: Done — feature `02-ui-ux-overhaul` implementada, verificada (`T1..T10`, Vitest, Playwright E2E, Verifier independente e SonarQube Quality Gate OK) e enviada para `origin/main`
-- **Completed**: `01-lumo-mvp` e `02-ui-ux-overhaul` (`T1..T10`)
+- **Feature**: `03-zardui-brand-and-shell`
+- **Phase / Task**: Complete — `T1..T12` implementadas, verificadas (Vitest + Playwright E2E + SonarQube Quality Gate OK) e aprovadas pelo usuário (`2026-11-27`)
+- **Completed**: `01-lumo-mvp`, `02-ui-ux-overhaul` e `03-zardui-brand-and-shell` (`T1..T12`)
 - **In-progress** (file:line): none
-- **Next step**: Especificar e planejar a próxima feature (`03-zardui-migration` — migração de componentes PrimeNG para ZardUI) em uma nova sessão
+- **Next step**: Iniciar próxima feature ou evolução da Fase 2 quando solicitado pelo usuário
 - **Blockers**: none
 - **Uncommitted files**: none
 - **Branch**: main

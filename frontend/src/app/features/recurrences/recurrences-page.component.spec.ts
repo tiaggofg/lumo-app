@@ -1,8 +1,8 @@
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { ConfirmationService, MessageService } from 'primeng/api';
 import { RecurringTransaction } from '../../core/models/api.models';
+import { ZConfirmService } from '../../shared/ui';
 import { CatalogStoreService } from '../catalog/catalog-store.service';
 import { RecurrencesPageComponent } from './recurrences-page.component';
 import { RecurrencesStoreService } from './recurrences-store.service';
@@ -12,7 +12,7 @@ describe('RecurrencesPageComponent', () => {
   let component: RecurrencesPageComponent;
   let store: RecurrencesStoreService;
   let catalogStore: CatalogStoreService;
-  let confirmationService: ConfirmationService;
+  let confirmService: ZConfirmService;
 
   const sampleRule: RecurringTransaction = {
     id: 'r1',
@@ -44,15 +44,13 @@ describe('RecurrencesPageComponent', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
-        ConfirmationService,
-        MessageService,
       ],
     });
     fixture = TestBed.createComponent(RecurrencesPageComponent);
     component = fixture.componentInstance;
     store = TestBed.inject(RecurrencesStoreService);
     catalogStore = TestBed.inject(CatalogStoreService);
-    confirmationService = TestBed.inject(ConfirmationService);
+    confirmService = TestBed.inject(ZConfirmService);
   });
 
   it('should enforce endMonth >= startMonth for FIXED_TERM', () => {
@@ -128,7 +126,7 @@ describe('RecurrencesPageComponent', () => {
     await component.activate(sampleRule);
     expect(actSpy).toHaveBeenCalledWith('r1');
 
-    const confirmSpy = vi.spyOn(confirmationService, 'confirm');
+    const confirmSpy = vi.spyOn(confirmService, 'confirm');
     component.confirmDelete(sampleRule);
     expect(confirmSpy).toHaveBeenCalled();
 

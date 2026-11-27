@@ -22,13 +22,17 @@ import {
   Legend,
   LinearScale,
   Tooltip,
+  TooltipItem,
 } from 'chart.js';
-import { ButtonModule } from 'primeng/button';
-import { SelectModule } from 'primeng/select';
 import { BreakdownItem, MonthlyBudgetDetail, MonthlyBudgetListItem } from '../../core/models/api.models';
 import { ThemeService } from '../../core/services/theme.service';
 import { BrlCurrencyPipe } from '../../shared/pipes/brl-currency.pipe';
 import { CompetenceMonthPipe } from '../../shared/pipes/competence-month.pipe';
+import {
+  ZChartContainerComponent,
+  ZChartLegendItem,
+  ZSelectComponent,
+} from '../../shared/ui';
 import { LUMO_CHART_PALETTE, resolveChartColors } from '../../shared/utils/chart-palette';
 import { BudgetsStoreService } from '../budgets/budgets-store.service';
 
@@ -54,8 +58,8 @@ export interface DashboardBreakdownEntry extends BreakdownItem {
   imports: [
     FormsModule,
     RouterLink,
-    SelectModule,
-    ButtonModule,
+    ZSelectComponent,
+    ZChartContainerComponent,
     BrlCurrencyPipe,
     CompetenceMonthPipe,
   ],
@@ -79,7 +83,7 @@ export interface DashboardBreakdownEntry extends BreakdownItem {
         @if (store.budgets().length > 0) {
           <div class="flex flex-wrap items-center gap-3">
             <div class="min-w-52" data-testid="dashboard-month-selector">
-              <p-select
+              <z-select
                 [ngModel]="selectedBudgetId()"
                 (ngModelChange)="onBudgetChange($event)"
                 [options]="budgetOptions()"
@@ -96,7 +100,7 @@ export interface DashboardBreakdownEntry extends BreakdownItem {
                 data-testid="dashboard-open-budget-btn"
                 class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-[15px] shadow-xs transition-colors"
               >
-                <i class="pi pi-list text-sm"></i>
+                <i class="pi pi-list text-sm" aria-hidden="true"></i>
                 <span>Ver lançamentos do mês</span>
               </a>
             }
@@ -104,9 +108,9 @@ export interface DashboardBreakdownEntry extends BreakdownItem {
             <a
               routerLink="/budgets"
               data-testid="dashboard-manage-budgets-link"
-              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-[15px] transition-colors"
+              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-[15px] shadow-2xs transition-colors"
             >
-              <i class="pi pi-wallet text-sm"></i>
+              <i class="pi pi-wallet text-sm" aria-hidden="true"></i>
               <span>Gerenciar Orçamentos</span>
             </a>
           </div>
@@ -117,10 +121,10 @@ export interface DashboardBreakdownEntry extends BreakdownItem {
       @if (!store.loadingList() && store.budgets().length === 0) {
         <div
           data-testid="dashboard-empty-state"
-          class="rounded-2xl bg-white dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-700 p-12 text-center space-y-5"
+          class="rounded-2xl bg-white dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-700 p-12 text-center space-y-5 shadow-sm"
         >
           <div class="w-16 h-16 mx-auto rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
-            <i class="pi pi-chart-pie text-3xl"></i>
+            <i class="pi pi-chart-pie text-3xl" aria-hidden="true"></i>
           </div>
           <div class="space-y-1.5">
             <h2 class="text-xl font-bold">Nenhum Orçamento Mensal cadastrado</h2>
@@ -134,26 +138,26 @@ export interface DashboardBreakdownEntry extends BreakdownItem {
               data-testid="dashboard-empty-create-btn"
               class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-base shadow-xs transition-colors"
             >
-              <i class="pi pi-plus"></i>
+              <i class="pi pi-plus" aria-hidden="true"></i>
               <span>Criar Primeiro Orçamento</span>
             </a>
           </div>
         </div>
       } @else if (detail(); as d) {
         <!-- Executive KPI Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5" data-testid="dashboard-kpi-cards">
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 items-stretch" data-testid="dashboard-kpi-cards">
           <!-- Receitas -->
-          <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 space-y-3 shadow-2xs">
+          <div class="h-full flex flex-col justify-between rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 space-y-3 shadow-sm">
             <div class="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               <span>Receitas do Mês</span>
               <span class="w-8 h-8 rounded-lg bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center">
-                <i class="pi pi-arrow-down-left text-sm"></i>
+                <i class="pi pi-arrow-down-left text-sm" aria-hidden="true"></i>
               </span>
             </div>
             <div class="text-3xl font-extrabold text-sky-600 dark:text-sky-400 tabular-nums" data-testid="kpi-planned-income">
               {{ d.summary.plannedIncome | brlCurrency }}
             </div>
-            <div class="text-sm text-slate-500 dark:text-slate-400 flex items-center justify-between pt-1 border-t border-slate-100 dark:border-slate-800">
+            <div class="text-sm text-slate-500 dark:text-slate-400 flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
               <span>Realizado (Recebido)</span>
               <span class="font-semibold text-slate-800 dark:text-slate-200 tabular-nums" data-testid="kpi-realized-income">
                 {{ d.summary.realizedIncome | brlCurrency }}
@@ -162,17 +166,17 @@ export interface DashboardBreakdownEntry extends BreakdownItem {
           </div>
 
           <!-- Despesas -->
-          <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 space-y-3 shadow-2xs">
+          <div class="h-full flex flex-col justify-between rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 space-y-3 shadow-sm">
             <div class="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               <span>Despesas do Mês</span>
               <span class="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center">
-                <i class="pi pi-arrow-up-right text-sm"></i>
+                <i class="pi pi-arrow-up-right text-sm" aria-hidden="true"></i>
               </span>
             </div>
             <div class="text-3xl font-extrabold text-rose-600 dark:text-rose-400 tabular-nums" data-testid="kpi-planned-expense">
               {{ d.summary.plannedExpense | brlCurrency }}
             </div>
-            <div class="text-sm text-slate-500 dark:text-slate-400 flex items-center justify-between pt-1 border-t border-slate-100 dark:border-slate-800">
+            <div class="text-sm text-slate-500 dark:text-slate-400 flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
               <span>Realizado (Pago)</span>
               <span class="font-semibold text-slate-800 dark:text-slate-200 tabular-nums" data-testid="kpi-realized-expense">
                 {{ d.summary.realizedExpense | brlCurrency }}
@@ -181,11 +185,11 @@ export interface DashboardBreakdownEntry extends BreakdownItem {
           </div>
 
           <!-- Saldo do Mês -->
-          <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 space-y-3 shadow-2xs">
+          <div class="h-full flex flex-col justify-between rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 space-y-3 shadow-sm">
             <div class="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               <span>Saldo Previsto</span>
               <span class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
-                <i class="pi pi-chart-line text-sm"></i>
+                <i class="pi pi-chart-line text-sm" aria-hidden="true"></i>
               </span>
             </div>
             <div
@@ -195,7 +199,7 @@ export interface DashboardBreakdownEntry extends BreakdownItem {
             >
               {{ d.summary.plannedBalance | brlCurrency }}
             </div>
-            <div class="text-sm text-slate-500 dark:text-slate-400 flex items-center justify-between pt-1 border-t border-slate-100 dark:border-slate-800">
+            <div class="text-sm text-slate-500 dark:text-slate-400 flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
               <span>Saldo Realizado</span>
               <span
                 class="font-semibold tabular-nums"
@@ -208,11 +212,11 @@ export interface DashboardBreakdownEntry extends BreakdownItem {
           </div>
 
           <!-- Progresso de Quitação -->
-          <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 space-y-3 shadow-2xs">
+          <div class="h-full flex flex-col justify-between rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 space-y-3 shadow-sm">
             <div class="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               <span>Progresso de Quitação</span>
               <span class="w-8 h-8 rounded-lg bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center">
-                <i class="pi pi-check-circle text-sm"></i>
+                <i class="pi pi-check-circle text-sm" aria-hidden="true"></i>
               </span>
             </div>
             <div class="text-3xl font-extrabold text-indigo-600 dark:text-indigo-400 tabular-nums" data-testid="kpi-settlement-percent">
@@ -233,38 +237,48 @@ export interface DashboardBreakdownEntry extends BreakdownItem {
           </div>
         </div>
 
-        <!-- 4 Multi-Color Analytical Chart Panels -->
-        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6" data-testid="dashboard-charts-grid">
+        <!-- 4 Multi-Color ZardUI / shadcn Chart Panels -->
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 items-stretch" data-testid="dashboard-charts-grid">
           <!-- Panel 1: Despesas por Categoria -->
-          <section class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 space-y-5 shadow-2xs">
-            <div class="flex items-center justify-between">
-              <div>
-                <h2 class="text-lg font-bold">Despesas por Categoria</h2>
-                <p class="text-sm text-slate-500 dark:text-slate-400">
-                  Distribuição prevista e participação percentual no mês
-                </p>
-              </div>
-              <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 tabular-nums">
-                {{ categoryBreakdown().length }} categoria(s)
-              </span>
-            </div>
-
+          <z-chart-container
+            title="Despesas por Categoria"
+            description="Distribuição prevista e participação percentual no mês"
+            [badgeText]="categoryBreakdown().length + ' categoria(s)'"
+            badgeVariant="default"
+            [legendItems]="categoryLegendItems()"
+            (legendToggle)="toggleCategorySlice($event)"
+          >
             @if (categoryBreakdown().length === 0) {
               <div
                 data-testid="empty-chart-category"
                 class="h-64 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 text-sm p-6 text-center"
               >
-                <i class="pi pi-chart-pie text-2xl mb-2 text-indigo-500"></i>
+                <i class="pi pi-chart-pie text-2xl mb-2 text-indigo-500" aria-hidden="true"></i>
                 <span>Nenhuma despesa registrada neste mês para exibir por categoria.</span>
               </div>
             } @else {
               <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-                <div class="md:col-span-6 relative h-64">
+                <div class="md:col-span-6 relative h-64 flex items-center justify-center">
                   <canvas #categoryCanvas data-testid="chart-category"></canvas>
+                  <div
+                    class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center px-6"
+                    data-testid="chart-category-center"
+                  >
+                    <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                      Total Previsto
+                    </span>
+                    <span class="text-base font-extrabold text-slate-900 dark:text-slate-100 tabular-nums mt-0.5">
+                      {{ d.summary.plannedExpense | brlCurrency }}
+                    </span>
+                  </div>
                 </div>
                 <div class="md:col-span-6 space-y-2.5 max-h-64 overflow-y-auto pr-1" data-testid="category-breakdown-list">
                   @for (cat of categoryBreakdown(); track cat.name) {
-                    <div class="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-50/80 dark:bg-slate-800/50 text-sm">
+                    <div
+                      (click)="toggleCategorySlice(cat.name)"
+                      [class.opacity-45]="hiddenCategories().has(cat.name)"
+                      class="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-100/70 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm cursor-pointer transition-all"
+                    >
                       <div class="flex items-center gap-2.5 min-w-0">
                         <span
                           class="w-3.5 h-3.5 rounded-full shrink-0"
@@ -285,28 +299,23 @@ export interface DashboardBreakdownEntry extends BreakdownItem {
                 </div>
               </div>
             }
-          </section>
+          </z-chart-container>
 
           <!-- Panel 2: Despesas por Beneficiário -->
-          <section class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 space-y-5 shadow-2xs">
-            <div class="flex items-center justify-between">
-              <div>
-                <h2 class="text-lg font-bold">Despesas por Beneficiário</h2>
-                <p class="text-sm text-slate-500 dark:text-slate-400">
-                  Comparativo multicolorido por centro de custo / beneficiário
-                </p>
-              </div>
-              <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-sky-50 text-sky-700 dark:bg-sky-950/60 dark:text-sky-300 tabular-nums">
-                {{ beneficiaryBreakdown().length }} beneficiário(s)
-              </span>
-            </div>
-
+          <z-chart-container
+            title="Despesas por Beneficiário"
+            description="Comparativo multicolorido por centro de custo / beneficiário"
+            [badgeText]="beneficiaryBreakdown().length + ' beneficiário(s)'"
+            badgeVariant="sky"
+            [legendItems]="beneficiaryLegendItems()"
+            (legendToggle)="toggleBeneficiarySeries($event)"
+          >
             @if (beneficiaryBreakdown().length === 0) {
               <div
                 data-testid="empty-chart-beneficiary"
                 class="h-64 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 text-sm p-6 text-center"
               >
-                <i class="pi pi-users text-2xl mb-2 text-sky-500"></i>
+                <i class="pi pi-users text-2xl mb-2 text-sky-500" aria-hidden="true"></i>
                 <span>Nenhuma despesa registrada neste mês para exibir por beneficiário.</span>
               </div>
             } @else {
@@ -316,7 +325,7 @@ export interface DashboardBreakdownEntry extends BreakdownItem {
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5" data-testid="beneficiary-breakdown-list">
                   @for (ben of beneficiaryBreakdown(); track ben.name) {
-                    <div class="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-50/80 dark:bg-slate-800/50 text-sm">
+                    <div class="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-100/70 dark:bg-slate-800/50 text-sm">
                       <div class="flex items-center gap-2 min-w-0">
                         <span
                           class="w-3 h-3 rounded-sm shrink-0"
@@ -337,25 +346,31 @@ export interface DashboardBreakdownEntry extends BreakdownItem {
                 </div>
               </div>
             }
-          </section>
+          </z-chart-container>
 
           <!-- Panel 3: Status de Liquidação -->
-          <section class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 space-y-5 shadow-2xs">
-            <div class="flex items-center justify-between">
-              <div>
-                <h2 class="text-lg font-bold">Status de Liquidação</h2>
-                <p class="text-sm text-slate-500 dark:text-slate-400">
-                  Composição dos lançamentos entre Liquidado, Pendente e Estimado
-                </p>
-              </div>
-              <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 tabular-nums">
-                {{ totalStatusCount() }} lançamento(s)
-              </span>
-            </div>
-
+          <z-chart-container
+            title="Status de Liquidação"
+            description="Composição dos lançamentos entre Liquidado, Pendente e Estimado"
+            [badgeText]="totalStatusCount() + ' lançamento(s)'"
+            badgeVariant="slate"
+            [legendItems]="statusLegendItems()"
+            (legendToggle)="toggleStatusSlice($event)"
+          >
             <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-              <div class="md:col-span-6 relative h-56">
+              <div class="md:col-span-6 relative h-56 flex items-center justify-center">
                 <canvas #statusCanvas data-testid="chart-status"></canvas>
+                <div
+                  class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center px-6"
+                  data-testid="chart-status-center"
+                >
+                  <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                    Quitação
+                  </span>
+                  <span class="text-xl font-extrabold text-indigo-600 dark:text-indigo-400 tabular-nums mt-0.5">
+                    {{ expensePaidPercent() }}%
+                  </span>
+                </div>
               </div>
               <div class="md:col-span-6 space-y-3" data-testid="status-breakdown-list">
                 <div class="flex items-center justify-between p-3 rounded-xl bg-sky-50/70 dark:bg-sky-950/40 border border-sky-200/60 dark:border-sky-900/50">
@@ -404,26 +419,21 @@ export interface DashboardBreakdownEntry extends BreakdownItem {
                 </div>
               </div>
             </div>
-          </section>
+          </z-chart-container>
 
           <!-- Panel 4: Evolução Mensal -->
-          <section class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 space-y-5 shadow-2xs">
-            <div class="flex items-center justify-between">
-              <div>
-                <h2 class="text-lg font-bold">Evolução Mensal</h2>
-                <p class="text-sm text-slate-500 dark:text-slate-400">
-                  Comparativo cronológico de Receitas, Despesas e Saldo entre competências
-                </p>
-              </div>
-              <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 tabular-nums">
-                {{ evolutionBudgets().length }} mês(es)
-              </span>
-            </div>
-
+          <z-chart-container
+            title="Evolução Mensal"
+            description="Comparativo cronológico de Receitas, Despesas e Saldo entre competências"
+            [badgeText]="evolutionBudgets().length + ' mês(es)'"
+            badgeVariant="default"
+            [legendItems]="evolutionLegendItems()"
+            (legendToggle)="toggleEvolutionSeries($event)"
+          >
             <div class="relative h-64">
               <canvas #evolutionCanvas data-testid="chart-evolution"></canvas>
             </div>
-          </section>
+          </z-chart-container>
         </div>
       }
     </div>
@@ -434,9 +444,15 @@ export class DashboardPageComponent implements OnInit, AfterViewInit, OnDestroy 
   private readonly themeService = inject(ThemeService);
   private readonly route = inject(ActivatedRoute);
   private readonly competenceMonthPipe = new CompetenceMonthPipe();
+  private readonly brlCurrencyPipe = new BrlCurrencyPipe();
 
   readonly selectedBudgetId = signal<string | null>(null);
   readonly detail = this.store.currentDetail;
+
+  readonly hiddenCategories = signal<Set<string>>(new Set());
+  readonly hiddenBeneficiarySeries = signal<Set<string>>(new Set());
+  readonly hiddenStatusSlices = signal<Set<string>>(new Set());
+  readonly hiddenEvolutionSeries = signal<Set<string>>(new Set());
 
   private readonly categoryCanvas = viewChild<ElementRef<HTMLCanvasElement>>('categoryCanvas');
   private readonly beneficiaryCanvas = viewChild<ElementRef<HTMLCanvasElement>>('beneficiaryCanvas');
@@ -509,6 +525,87 @@ export class DashboardPageComponent implements OnInit, AfterViewInit, OnDestroy 
     }));
   });
 
+  readonly categoryLegendItems = computed<ZChartLegendItem[]>(() => {
+    const hidden = this.hiddenCategories();
+    return this.categoryBreakdown().map((cat) => ({
+      key: cat.name,
+      label: cat.name,
+      color: cat.resolvedColor,
+      valueText: `${cat.sharePercent}%`,
+      active: !hidden.has(cat.name),
+    }));
+  });
+
+  readonly beneficiaryLegendItems = computed<ZChartLegendItem[]>(() => {
+    const hidden = this.hiddenBeneficiarySeries();
+    return [
+      {
+        key: 'planned',
+        label: 'Previsto (R$)',
+        color: '#4F46E5',
+        active: !hidden.has('planned'),
+      },
+      {
+        key: 'realized',
+        label: 'Realizado / Pago (R$)',
+        color: '#0284C7',
+        active: !hidden.has('realized'),
+      },
+    ];
+  });
+
+  readonly statusLegendItems = computed<ZChartLegendItem[]>(() => {
+    const hidden = this.hiddenStatusSlices();
+    const d = this.detail();
+    return [
+      {
+        key: 'settled',
+        label: 'Liquidado',
+        color: '#0284C7',
+        valueText: String(d?.statusCounts.settled ?? 0),
+        active: !hidden.has('settled'),
+      },
+      {
+        key: 'pending',
+        label: 'Pendente',
+        color: '#4F46E5',
+        valueText: String(d?.statusCounts.pending ?? 0),
+        active: !hidden.has('pending'),
+      },
+      {
+        key: 'estimated',
+        label: 'Estimado',
+        color: '#D97706',
+        valueText: String(d?.statusCounts.estimated ?? 0),
+        active: !hidden.has('estimated'),
+      },
+    ];
+  });
+
+  readonly evolutionLegendItems = computed<ZChartLegendItem[]>(() => {
+    const hidden = this.hiddenEvolutionSeries();
+    return [
+      {
+        key: 'income',
+        label: 'Receitas Previstas',
+        color: '#0284C7',
+        active: !hidden.has('income'),
+      },
+      {
+        key: 'expense',
+        label: 'Despesas Previstas',
+        color: '#E11D48',
+        active: !hidden.has('expense'),
+      },
+      {
+        key: 'balance',
+        label: 'Saldo Previsto',
+        color: '#4F46E5',
+        active: !hidden.has('balance'),
+      },
+    ];
+  });
+
   constructor() {
     effect(() => {
       const detail = this.detail();
@@ -516,6 +613,11 @@ export class DashboardPageComponent implements OnInit, AfterViewInit, OnDestroy 
       const beneficiaries = this.beneficiaryBreakdown();
       const evolution = this.evolutionBudgets();
       const isDark = this.themeService.isDark();
+      this.hiddenCategories();
+      this.hiddenBeneficiarySeries();
+      this.hiddenStatusSlices();
+      this.hiddenEvolutionSeries();
+
       if (this.viewReady && detail) {
         queueMicrotask(() =>
           this.renderCharts(detail, categories, beneficiaries, evolution, isDark)
@@ -546,10 +648,58 @@ export class DashboardPageComponent implements OnInit, AfterViewInit, OnDestroy 
     this.destroyCharts();
   }
 
-  async onBudgetChange(budgetId: string | null): Promise<void> {
-    if (!budgetId) return;
+  async onBudgetChange(budgetId: unknown): Promise<void> {
+    if (typeof budgetId !== 'string' || !budgetId) return;
     this.selectedBudgetId.set(budgetId);
     await this.store.loadBudgetDetail(budgetId);
+  }
+
+  toggleCategorySlice(name: string): void {
+    this.hiddenCategories.update((set) => {
+      const next = new Set(set);
+      if (next.has(name)) {
+        next.delete(name);
+      } else {
+        next.add(name);
+      }
+      return next;
+    });
+  }
+
+  toggleBeneficiarySeries(key: string): void {
+    this.hiddenBeneficiarySeries.update((set) => {
+      const next = new Set(set);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  }
+
+  toggleStatusSlice(key: string): void {
+    this.hiddenStatusSlices.update((set) => {
+      const next = new Set(set);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  }
+
+  toggleEvolutionSeries(key: string): void {
+    this.hiddenEvolutionSeries.update((set) => {
+      const next = new Set(set);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
   }
 
   private async initializeDashboard(): Promise<void> {
@@ -572,6 +722,29 @@ export class DashboardPageComponent implements OnInit, AfterViewInit, OnDestroy 
     await this.store.loadBudgetDetail(matched.id);
   }
 
+  private buildShadcnTooltip(isDark: boolean, isCurrency = true) {
+    return {
+      backgroundColor: isDark ? '#020617' : '#0F172A',
+      titleColor: '#F8FAFC',
+      bodyColor: '#E2E8F0',
+      borderColor: '#334155',
+      borderWidth: 1,
+      cornerRadius: 10,
+      padding: 12,
+      boxPadding: 6,
+      usePointStyle: true,
+      callbacks: {
+        label: (ctx: TooltipItem<'doughnut' | 'bar'>) => {
+          const rawVal = Number(ctx.raw ?? 0);
+          const formatted = isCurrency
+            ? this.brlCurrencyPipe.transform(rawVal)
+            : `${rawVal} lançamento(s)`;
+          return ` ${ctx.label || ctx.dataset.label}: ${formatted}`;
+        },
+      },
+    };
+  }
+
   private renderCharts(
     detail: MonthlyBudgetDetail,
     categories: DashboardBreakdownEntry[],
@@ -586,16 +759,22 @@ export class DashboardPageComponent implements OnInit, AfterViewInit, OnDestroy 
     try {
       const catEl = this.categoryCanvas()?.nativeElement;
       if (catEl && categories.length > 0) {
+        const hiddenCats = this.hiddenCategories();
+        const visibleCats = categories.filter((c) => !hiddenCats.has(c.name));
+        const activeCats = visibleCats.length > 0 ? visibleCats : categories;
+
         this.categoryChart = new Chart(catEl, {
           type: 'doughnut',
           data: {
-            labels: categories.map((c) => c.name),
+            labels: activeCats.map((c) => c.name),
             datasets: [
               {
                 label: 'Previsto (R$)',
-                data: categories.map((c) => c.plannedAmount),
-                backgroundColor: categories.map((c) => c.resolvedColor),
+                data: activeCats.map((c) => c.plannedAmount),
+                backgroundColor: activeCats.map((c) => c.resolvedColor),
                 borderWidth: 2,
+                borderRadius: 6,
+                spacing: 2,
                 borderColor: isDark ? '#0F172A' : '#FFFFFF',
               },
             ],
@@ -603,11 +782,10 @@ export class DashboardPageComponent implements OnInit, AfterViewInit, OnDestroy 
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            cutout: '66%',
+            cutout: '72%',
             plugins: {
-              legend: {
-                display: false,
-              },
+              legend: { display: false },
+              tooltip: this.buildShadcnTooltip(isDark, true),
             },
           },
         });
@@ -615,6 +793,7 @@ export class DashboardPageComponent implements OnInit, AfterViewInit, OnDestroy 
 
       const benEl = this.beneficiaryCanvas()?.nativeElement;
       if (benEl && beneficiaries.length > 0) {
+        const hiddenBen = this.hiddenBeneficiarySeries();
         this.beneficiaryChart = new Chart(benEl, {
           type: 'bar',
           data: {
@@ -625,12 +804,14 @@ export class DashboardPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 data: beneficiaries.map((b) => b.plannedAmount),
                 backgroundColor: beneficiaries.map((b) => b.resolvedColor),
                 borderRadius: 6,
+                hidden: hiddenBen.has('planned'),
               },
               {
                 label: 'Realizado / Pago (R$)',
                 data: beneficiaries.map((b) => b.realizedAmount),
                 backgroundColor: '#0284C7',
                 borderRadius: 6,
+                hidden: hiddenBen.has('realized'),
               },
             ],
           },
@@ -639,9 +820,8 @@ export class DashboardPageComponent implements OnInit, AfterViewInit, OnDestroy 
             maintainAspectRatio: false,
             indexAxis: 'y',
             plugins: {
-              legend: {
-                labels: { color: textColor, boxWidth: 12 },
-              },
+              legend: { display: false },
+              tooltip: this.buildShadcnTooltip(isDark, true),
             },
             scales: {
               x: {
@@ -660,16 +840,27 @@ export class DashboardPageComponent implements OnInit, AfterViewInit, OnDestroy 
       const statusEl = this.statusCanvas()?.nativeElement;
       if (statusEl) {
         const counts = detail.statusCounts;
-        const total = counts.settled + counts.pending + counts.estimated;
+        const hiddenStatus = this.hiddenStatusSlices();
+        const rawSlices = [
+          { key: 'settled', label: 'Liquidado (Pago/Recebido)', count: counts.settled, color: '#0284C7' },
+          { key: 'pending', label: 'Pendente', count: counts.pending, color: '#4F46E5' },
+          { key: 'estimated', label: 'Estimado', count: counts.estimated, color: '#D97706' },
+        ];
+        const visibleSlices = rawSlices.filter((s) => !hiddenStatus.has(s.key));
+        const activeSlices = visibleSlices.length > 0 ? visibleSlices : rawSlices;
+        const total = activeSlices.reduce((acc, s) => acc + s.count, 0);
+
         this.statusChart = new Chart(statusEl, {
           type: 'doughnut',
           data: {
-            labels: ['Liquidado (Pago/Recebido)', 'Pendente', 'Estimado'],
+            labels: activeSlices.map((s) => s.label),
             datasets: [
               {
-                data: total > 0 ? [counts.settled, counts.pending, counts.estimated] : [1, 0, 0],
-                backgroundColor: ['#0284C7', '#4F46E5', '#D97706'],
+                data: total > 0 ? activeSlices.map((s) => s.count) : [1, 0, 0],
+                backgroundColor: activeSlices.map((s) => s.color),
                 borderWidth: 2,
+                borderRadius: 6,
+                spacing: 2,
                 borderColor: isDark ? '#0F172A' : '#FFFFFF',
               },
             ],
@@ -677,12 +868,10 @@ export class DashboardPageComponent implements OnInit, AfterViewInit, OnDestroy 
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            cutout: '64%',
+            cutout: '72%',
             plugins: {
-              legend: {
-                position: 'bottom',
-                labels: { color: textColor, boxWidth: 12, padding: 12 },
-              },
+              legend: { display: false },
+              tooltip: this.buildShadcnTooltip(isDark, false),
             },
           },
         });
@@ -690,6 +879,7 @@ export class DashboardPageComponent implements OnInit, AfterViewInit, OnDestroy 
 
       const evoEl = this.evolutionCanvas()?.nativeElement;
       if (evoEl && evolution.length > 0) {
+        const hiddenEvo = this.hiddenEvolutionSeries();
         this.evolutionChart = new Chart(evoEl, {
           type: 'bar',
           data: {
@@ -700,18 +890,21 @@ export class DashboardPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 data: evolution.map((b) => b.summary.plannedIncome),
                 backgroundColor: '#0284C7',
                 borderRadius: 6,
+                hidden: hiddenEvo.has('income'),
               },
               {
                 label: 'Despesas Previstas (R$)',
                 data: evolution.map((b) => b.summary.plannedExpense),
                 backgroundColor: '#E11D48',
                 borderRadius: 6,
+                hidden: hiddenEvo.has('expense'),
               },
               {
                 label: 'Saldo Previsto (R$)',
                 data: evolution.map((b) => b.summary.plannedBalance),
                 backgroundColor: '#4F46E5',
                 borderRadius: 6,
+                hidden: hiddenEvo.has('balance'),
               },
             ],
           },
@@ -719,9 +912,8 @@ export class DashboardPageComponent implements OnInit, AfterViewInit, OnDestroy 
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-              legend: {
-                labels: { color: textColor, boxWidth: 12 },
-              },
+              legend: { display: false },
+              tooltip: this.buildShadcnTooltip(isDark, true),
             },
             scales: {
               x: {

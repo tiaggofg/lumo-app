@@ -1,33 +1,41 @@
 import { Component, effect, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ButtonModule } from 'primeng/button';
-import { CheckboxModule } from 'primeng/checkbox';
-import { DialogModule } from 'primeng/dialog';
-import { InputNumberModule } from 'primeng/inputnumber';
-import { SelectModule } from 'primeng/select';
 import { ConfirmEstimatePayload, Transaction } from '../../core/models/api.models';
+import {
+  ZButtonComponent,
+  ZCheckboxComponent,
+  ZDialogComponent,
+  ZInputNumberComponent,
+  ZSelectComponent,
+} from '../../shared/ui';
 
 @Component({
   selector: 'app-confirm-estimate-dialog',
   standalone: true,
-  imports: [FormsModule, ButtonModule, CheckboxModule, DialogModule, InputNumberModule, SelectModule],
+  imports: [
+    FormsModule,
+    ZButtonComponent,
+    ZCheckboxComponent,
+    ZDialogComponent,
+    ZInputNumberComponent,
+    ZSelectComponent,
+  ],
   template: `
-    <p-dialog
+    <z-dialog
       header="Confirmar Valor Real"
       [visible]="visible()"
       (visibleChange)="visibleChange.emit($event)"
-      [modal]="true"
-      [style]="{ width: '26rem', maxWidth: '95vw' }"
+      widthClass="max-w-md"
     >
       @if (transaction(); as txn) {
-        <div class="space-y-4 pt-2">
+        <div class="space-y-4 pt-1">
           <p class="text-sm text-slate-600 dark:text-slate-300">
             Informe o valor fechado para <strong>{{ txn.description }}</strong>.
           </p>
 
           <div class="flex flex-col gap-1.5">
             <label for="estimate-amount" class="text-sm font-medium">Valor real (R$)</label>
-            <p-inputnumber
+            <z-input-number
               inputId="estimate-amount"
               data-testid="confirm-estimate-amount"
               [(ngModel)]="amount"
@@ -41,7 +49,7 @@ import { ConfirmEstimatePayload, Transaction } from '../../core/models/api.model
 
           <div class="flex flex-col gap-1.5">
             <label for="estimate-status" class="text-sm font-medium">Novo status</label>
-            <p-select
+            <z-select
               inputId="estimate-status"
               [(ngModel)]="targetStatus"
               [options]="statusOptions()"
@@ -53,7 +61,7 @@ import { ConfirmEstimatePayload, Transaction } from '../../core/models/api.model
 
           @if (txn.sourceRecurringTransactionId) {
             <div class="flex items-center gap-2 pt-1">
-              <p-checkbox
+              <z-checkbox
                 inputId="update-template"
                 [(ngModel)]="updateRecurringTemplate"
                 [binary]="true"
@@ -68,16 +76,16 @@ import { ConfirmEstimatePayload, Transaction } from '../../core/models/api.model
 
       <ng-template #footer>
         <div class="flex justify-end gap-2">
-          <p-button label="Cancelar" severity="secondary" [text]="true" (onClick)="visibleChange.emit(false)" />
-          <p-button
+          <z-button label="Cancelar" variant="ghost" (buttonClick)="visibleChange.emit(false)" />
+          <z-button
             label="Confirmar"
             data-testid="confirm-estimate-submit"
             [disabled]="!amount || amount <= 0"
-            (onClick)="submit()"
+            (buttonClick)="submit()"
           />
         </div>
       </ng-template>
-    </p-dialog>
+    </z-dialog>
   `,
 })
 export class ConfirmEstimateDialogComponent {

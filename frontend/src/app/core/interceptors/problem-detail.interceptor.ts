@@ -1,11 +1,11 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { MessageService } from 'primeng/api';
 import { catchError, throwError } from 'rxjs';
+import { ZToastService } from '../../shared/ui/toast/z-toast.service';
 import { ProblemDetail } from '../models/api.models';
 
 export const problemDetailInterceptor: HttpInterceptorFn = (req, next) => {
-  const messageService = inject(MessageService);
+  const toastService = inject(ZToastService);
 
   return next(req).pipe(
     catchError((error: unknown) => {
@@ -17,7 +17,7 @@ export const problemDetailInterceptor: HttpInterceptorFn = (req, next) => {
             ? problem.errors.map((e) => `${e.field}: ${e.message}`).join(' • ')
             : (problem?.detail ?? 'Não foi possível concluir a operação. Tente novamente.');
 
-        messageService.add({
+        toastService.add({
           severity: error.status === 404 || error.status === 409 ? 'warn' : 'error',
           summary,
           detail,

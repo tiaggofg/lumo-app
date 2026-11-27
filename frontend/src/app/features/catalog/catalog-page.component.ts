@@ -1,18 +1,26 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ConfirmationService, MessageService } from 'primeng/api';
-import { ButtonModule } from 'primeng/button';
-import { DialogModule } from 'primeng/dialog';
-import { InputTextModule } from 'primeng/inputtext';
-import { SelectModule } from 'primeng/select';
-import { TagModule } from 'primeng/tag';
 import { Beneficiary, Category, TransactionType } from '../../core/models/api.models';
+import {
+  ZButtonComponent,
+  ZConfirmService,
+  ZDialogComponent,
+  ZInputDirective,
+  ZSelectComponent,
+  ZToastService,
+} from '../../shared/ui';
 import { CatalogStoreService } from './catalog-store.service';
 
 @Component({
   selector: 'app-catalog-page',
   standalone: true,
-  imports: [FormsModule, ButtonModule, DialogModule, InputTextModule, SelectModule, TagModule],
+  imports: [
+    FormsModule,
+    ZButtonComponent,
+    ZDialogComponent,
+    ZInputDirective,
+    ZSelectComponent,
+  ],
   template: `
     <div class="space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -25,18 +33,18 @@ import { CatalogStoreService } from './catalog-store.service';
 
         <div class="flex items-center gap-2">
           @if (activeTab() === 'categories') {
-            <p-button
+            <z-button
               label="Nova Categoria"
               icon="pi pi-plus"
               data-testid="new-category-btn"
-              (onClick)="openCategoryDialog()"
+              (buttonClick)="openCategoryDialog()"
             />
           } @else {
-            <p-button
+            <z-button
               label="Novo Beneficiário"
               icon="pi pi-plus"
               data-testid="new-beneficiary-btn"
-              (onClick)="openBeneficiaryDialog()"
+              (buttonClick)="openBeneficiaryDialog()"
             />
           }
         </div>
@@ -83,7 +91,7 @@ import { CatalogStoreService } from './catalog-store.service';
                 [class]="
                   categoryTypeFilter() === filter.value
                     ? 'bg-indigo-600 text-white font-semibold shadow-xs'
-                    : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 font-medium'
+                    : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200/90 dark:border-slate-800 font-medium'
                 "
                 class="px-3.5 py-2 rounded-xl text-sm transition-colors cursor-pointer"
               >
@@ -95,7 +103,7 @@ import { CatalogStoreService } from './catalog-store.service';
           <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
             @for (cat of filteredCategories(); track cat.id) {
               <div
-                class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shadow-xs"
+                class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 flex items-center justify-between gap-3 shadow-sm"
                 [class.opacity-60]="!cat.active"
               >
                 <div class="flex items-center gap-3.5 min-w-0">
@@ -103,7 +111,7 @@ import { CatalogStoreService } from './catalog-store.service';
                     class="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0"
                     [style.background-color]="cat.color || '#4F46E5'"
                   >
-                    <i [class]="cat.icon || 'pi pi-tag'"></i>
+                    <i [class]="cat.icon || 'pi pi-tag'" aria-hidden="true"></i>
                   </span>
                   <div class="min-w-0">
                     <div class="font-semibold text-[15px] truncate">{{ cat.name }}</div>
@@ -130,7 +138,7 @@ import { CatalogStoreService } from './catalog-store.service';
                     title="Editar categoria"
                     aria-label="Editar categoria"
                   >
-                    <i class="pi pi-pencil text-sm"></i>
+                    <i class="pi pi-pencil text-sm" aria-hidden="true"></i>
                   </button>
                   <button
                     type="button"
@@ -139,7 +147,7 @@ import { CatalogStoreService } from './catalog-store.service';
                     [title]="cat.active ? 'Desativar' : 'Reativar'"
                     [attr.aria-label]="cat.active ? 'Desativar categoria' : 'Reativar categoria'"
                   >
-                    <i [class]="cat.active ? 'pi pi-eye-slash text-sm' : 'pi pi-eye text-sm'"></i>
+                    <i [class]="cat.active ? 'pi pi-eye-slash text-sm' : 'pi pi-eye text-sm'" aria-hidden="true"></i>
                   </button>
                   <button
                     type="button"
@@ -148,7 +156,7 @@ import { CatalogStoreService } from './catalog-store.service';
                     title="Excluir categoria"
                     aria-label="Excluir categoria"
                   >
-                    <i class="pi pi-trash text-sm"></i>
+                    <i class="pi pi-trash text-sm" aria-hidden="true"></i>
                   </button>
                 </div>
               </div>
@@ -162,7 +170,7 @@ import { CatalogStoreService } from './catalog-store.service';
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
           @for (ben of store.beneficiaries(); track ben.id) {
             <div
-              class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shadow-xs"
+              class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 flex items-center justify-between gap-3 shadow-sm"
               [class.opacity-60]="!ben.active"
             >
               <div class="flex items-center gap-3.5 min-w-0">
@@ -188,7 +196,7 @@ import { CatalogStoreService } from './catalog-store.service';
                   title="Editar beneficiário"
                   aria-label="Editar beneficiário"
                 >
-                  <i class="pi pi-pencil text-xs"></i>
+                  <i class="pi pi-pencil text-xs" aria-hidden="true"></i>
                 </button>
                 <button
                   type="button"
@@ -197,7 +205,7 @@ import { CatalogStoreService } from './catalog-store.service';
                   [title]="ben.active ? 'Desativar' : 'Reativar'"
                   [attr.aria-label]="ben.active ? 'Desativar beneficiário' : 'Reativar beneficiário'"
                 >
-                  <i [class]="ben.active ? 'pi pi-eye-slash text-xs' : 'pi pi-eye text-xs'"></i>
+                  <i [class]="ben.active ? 'pi pi-eye-slash text-xs' : 'pi pi-eye text-xs'" aria-hidden="true"></i>
                 </button>
                 <button
                   type="button"
@@ -206,7 +214,7 @@ import { CatalogStoreService } from './catalog-store.service';
                   title="Excluir beneficiário"
                   aria-label="Excluir beneficiário"
                 >
-                  <i class="pi pi-trash text-xs"></i>
+                  <i class="pi pi-trash text-xs" aria-hidden="true"></i>
                 </button>
               </div>
             </div>
@@ -216,29 +224,27 @@ import { CatalogStoreService } from './catalog-store.service';
     </div>
 
     <!-- Category Dialog -->
-    <p-dialog
+    <z-dialog
       [header]="editingCategoryId() ? 'Editar Categoria' : 'Nova Categoria'"
       [(visible)]="categoryDialogVisible"
-      [modal]="true"
-      [style]="{ width: '26rem', maxWidth: '95vw' }"
+      widthClass="max-w-md"
     >
-      <div class="space-y-4 pt-2">
+      <div class="space-y-4 pt-1">
         <div class="flex flex-col gap-1.5">
           <label for="cat-name" class="text-sm font-medium">Nome</label>
           <input
             id="cat-name"
-            pInputText
+            zInput
             [(ngModel)]="categoryForm.name"
             maxlength="80"
             placeholder="Ex.: Pets"
-            class="w-full"
           />
         </div>
 
         @if (!editingCategoryId()) {
           <div class="flex flex-col gap-1.5">
             <label for="cat-type" class="text-sm font-medium">Tipo</label>
-            <p-select
+            <z-select
               inputId="cat-type"
               [(ngModel)]="categoryForm.type"
               [options]="typeOptions"
@@ -257,14 +263,14 @@ import { CatalogStoreService } from './catalog-store.service';
                 id="cat-color"
                 type="color"
                 [(ngModel)]="categoryForm.color"
-                class="w-10 h-10 rounded cursor-pointer border border-slate-300 dark:border-slate-700"
+                class="w-10 h-10 rounded-lg cursor-pointer border border-slate-300 dark:border-slate-700"
               />
-              <input pInputText [(ngModel)]="categoryForm.color" class="w-full text-xs" />
+              <input zInput [(ngModel)]="categoryForm.color" class="text-xs" />
             </div>
           </div>
           <div class="flex flex-col gap-1.5">
             <label for="cat-icon" class="text-sm font-medium">Ícone</label>
-            <p-select
+            <z-select
               inputId="cat-icon"
               [(ngModel)]="categoryForm.icon"
               [options]="iconOptions"
@@ -278,58 +284,56 @@ import { CatalogStoreService } from './catalog-store.service';
 
       <ng-template #footer>
         <div class="flex justify-end gap-2">
-          <p-button label="Cancelar" severity="secondary" [text]="true" (onClick)="categoryDialogVisible = false" />
-          <p-button
+          <z-button label="Cancelar" variant="ghost" (buttonClick)="categoryDialogVisible = false" />
+          <z-button
             label="Salvar"
             data-testid="save-category-btn"
             [loading]="saving()"
             [disabled]="!categoryForm.name.trim()"
-            (onClick)="saveCategory()"
+            (buttonClick)="saveCategory()"
           />
         </div>
       </ng-template>
-    </p-dialog>
+    </z-dialog>
 
     <!-- Beneficiary Dialog -->
-    <p-dialog
+    <z-dialog
       [header]="editingBeneficiaryId() ? 'Editar Beneficiário' : 'Novo Beneficiário'"
       [(visible)]="beneficiaryDialogVisible"
-      [modal]="true"
-      [style]="{ width: '24rem', maxWidth: '95vw' }"
+      widthClass="max-w-md"
     >
-      <div class="space-y-4 pt-2">
+      <div class="space-y-4 pt-1">
         <div class="flex flex-col gap-1.5">
           <label for="ben-name" class="text-sm font-medium">Nome</label>
           <input
             id="ben-name"
-            pInputText
+            zInput
             [(ngModel)]="beneficiaryName"
             maxlength="80"
             placeholder="Ex.: Tiago"
-            class="w-full"
           />
         </div>
       </div>
 
       <ng-template #footer>
         <div class="flex justify-end gap-2">
-          <p-button label="Cancelar" severity="secondary" [text]="true" (onClick)="beneficiaryDialogVisible = false" />
-          <p-button
+          <z-button label="Cancelar" variant="ghost" (buttonClick)="beneficiaryDialogVisible = false" />
+          <z-button
             label="Salvar"
             data-testid="save-beneficiary-btn"
             [loading]="saving()"
             [disabled]="!beneficiaryName.trim()"
-            (onClick)="saveBeneficiary()"
+            (buttonClick)="saveBeneficiary()"
           />
         </div>
       </ng-template>
-    </p-dialog>
+    </z-dialog>
   `,
 })
 export class CatalogPageComponent implements OnInit {
   readonly store = inject(CatalogStoreService);
-  private readonly confirmationService = inject(ConfirmationService);
-  private readonly messageService = inject(MessageService);
+  private readonly confirmService = inject(ZConfirmService);
+  private readonly toastService = inject(ZToastService);
 
   readonly activeTab = signal<'categories' | 'beneficiaries'>('categories');
   readonly categoryTypeFilter = signal<'ALL' | TransactionType>('ALL');
@@ -414,7 +418,7 @@ export class CatalogPageComponent implements OnInit {
           color: this.categoryForm.color,
           icon: this.categoryForm.icon,
         });
-        this.messageService.add({ severity: 'success', summary: 'Categoria atualizada' });
+        this.toastService.add({ severity: 'success', summary: 'Categoria atualizada' });
       } else {
         await this.store.createCategory({
           name: this.categoryForm.name.trim(),
@@ -422,7 +426,7 @@ export class CatalogPageComponent implements OnInit {
           color: this.categoryForm.color,
           icon: this.categoryForm.icon,
         });
-        this.messageService.add({ severity: 'success', summary: 'Categoria criada' });
+        this.toastService.add({ severity: 'success', summary: 'Categoria criada' });
       }
       this.categoryDialogVisible = false;
     } finally {
@@ -432,23 +436,23 @@ export class CatalogPageComponent implements OnInit {
 
   async toggleCategory(cat: Category): Promise<void> {
     await this.store.toggleCategoryStatus(cat.id, !cat.active);
-    this.messageService.add({
+    this.toastService.add({
       severity: 'info',
       summary: cat.active ? 'Categoria desativada' : 'Categoria reativada',
     });
   }
 
   confirmDeleteCategory(cat: Category): void {
-    this.confirmationService.confirm({
+    this.confirmService.confirm({
       header: 'Excluir Categoria',
       message: `Deseja excluir fisicamente a categoria "${cat.name}"?`,
       icon: 'pi pi-exclamation-triangle',
       acceptLabel: 'Excluir',
       rejectLabel: 'Cancelar',
-      acceptButtonStyleClass: 'p-button-danger',
+      variant: 'destructive',
       accept: () => {
         void this.store.deleteCategory(cat.id).then(() => {
-          this.messageService.add({ severity: 'success', summary: 'Categoria excluída' });
+          this.toastService.add({ severity: 'success', summary: 'Categoria excluída' });
         });
       },
     });
@@ -472,10 +476,10 @@ export class CatalogPageComponent implements OnInit {
       const id = this.editingBeneficiaryId();
       if (id) {
         await this.store.updateBeneficiary(id, this.beneficiaryName.trim());
-        this.messageService.add({ severity: 'success', summary: 'Beneficiário atualizado' });
+        this.toastService.add({ severity: 'success', summary: 'Beneficiário atualizado' });
       } else {
         await this.store.createBeneficiary(this.beneficiaryName.trim());
-        this.messageService.add({ severity: 'success', summary: 'Beneficiário criado' });
+        this.toastService.add({ severity: 'success', summary: 'Beneficiário criado' });
       }
       this.beneficiaryDialogVisible = false;
     } finally {
@@ -485,23 +489,23 @@ export class CatalogPageComponent implements OnInit {
 
   async toggleBeneficiary(ben: Beneficiary): Promise<void> {
     await this.store.toggleBeneficiaryStatus(ben.id, !ben.active);
-    this.messageService.add({
+    this.toastService.add({
       severity: 'info',
       summary: ben.active ? 'Beneficiário desativado' : 'Beneficiário reativado',
     });
   }
 
   confirmDeleteBeneficiary(ben: Beneficiary): void {
-    this.confirmationService.confirm({
+    this.confirmService.confirm({
       header: 'Excluir Beneficiário',
       message: `Deseja excluir fisicamente o beneficiário "${ben.name}"?`,
       icon: 'pi pi-exclamation-triangle',
       acceptLabel: 'Excluir',
       rejectLabel: 'Cancelar',
-      acceptButtonStyleClass: 'p-button-danger',
+      variant: 'destructive',
       accept: () => {
         void this.store.deleteBeneficiary(ben.id).then(() => {
-          this.messageService.add({ severity: 'success', summary: 'Beneficiário excluído' });
+          this.toastService.add({ severity: 'success', summary: 'Beneficiário excluído' });
         });
       },
     });

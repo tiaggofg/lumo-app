@@ -1,17 +1,19 @@
 import { Component, computed, effect, inject, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ButtonModule } from 'primeng/button';
-import { DialogModule } from 'primeng/dialog';
-import { InputNumberModule } from 'primeng/inputnumber';
-import { InputTextModule } from 'primeng/inputtext';
-import { SelectModule } from 'primeng/select';
-import { TextareaModule } from 'primeng/textarea';
 import {
   Transaction,
   TransactionPayload,
   TransactionStatus,
   TransactionType,
 } from '../../core/models/api.models';
+import {
+  ZButtonComponent,
+  ZDialogComponent,
+  ZInputDirective,
+  ZInputNumberComponent,
+  ZSelectComponent,
+  ZTextareaDirective,
+} from '../../shared/ui';
 import { CatalogStoreService } from '../catalog/catalog-store.service';
 
 @Component({
@@ -19,26 +21,25 @@ import { CatalogStoreService } from '../catalog/catalog-store.service';
   standalone: true,
   imports: [
     FormsModule,
-    ButtonModule,
-    DialogModule,
-    InputNumberModule,
-    InputTextModule,
-    SelectModule,
-    TextareaModule,
+    ZButtonComponent,
+    ZDialogComponent,
+    ZInputNumberComponent,
+    ZInputDirective,
+    ZSelectComponent,
+    ZTextareaDirective,
   ],
   template: `
-    <p-dialog
+    <z-dialog
       [header]="transaction() ? 'Editar Lançamento' : 'Novo Lançamento'"
       [visible]="visible()"
       (visibleChange)="visibleChange.emit($event)"
-      [modal]="true"
-      [style]="{ width: '32rem', maxWidth: '96vw' }"
+      widthClass="max-w-lg"
     >
-      <div class="space-y-4 pt-2">
+      <div class="space-y-4 pt-1">
         <div class="grid grid-cols-2 gap-3">
           <div class="flex flex-col gap-1.5">
             <label for="txn-type" class="text-sm font-medium">Tipo</label>
-            <p-select
+            <z-select
               inputId="txn-type"
               [(ngModel)]="form.type"
               (ngModelChange)="onTypeChange()"
@@ -51,7 +52,7 @@ import { CatalogStoreService } from '../catalog/catalog-store.service';
 
           <div class="flex flex-col gap-1.5">
             <label for="txn-status" class="text-sm font-medium">Status</label>
-            <p-select
+            <z-select
               inputId="txn-status"
               [(ngModel)]="form.status"
               [options]="statusOptions()"
@@ -67,18 +68,17 @@ import { CatalogStoreService } from '../catalog/catalog-store.service';
           <input
             id="txn-desc"
             data-testid="txn-description-input"
-            pInputText
+            zInput
             [(ngModel)]="form.description"
             maxlength="140"
             placeholder="Ex.: Aluguel, Salário, Cartão Nubank"
-            class="w-full"
           />
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="flex flex-col gap-1.5">
             <label for="txn-amount" class="text-sm font-medium">Valor (R$)</label>
-            <p-inputnumber
+            <z-input-number
               inputId="txn-amount"
               data-testid="txn-amount-input"
               [(ngModel)]="form.amount"
@@ -94,9 +94,9 @@ import { CatalogStoreService } from '../catalog/catalog-store.service';
             <label for="txn-due" class="text-sm font-medium">Vencimento (opcional)</label>
             <input
               id="txn-due"
+              zInput
               type="date"
               [(ngModel)]="form.dueDate"
-              class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm"
             />
           </div>
         </div>
@@ -104,7 +104,7 @@ import { CatalogStoreService } from '../catalog/catalog-store.service';
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="flex flex-col gap-1.5">
             <label for="txn-category" class="text-sm font-medium">Categoria</label>
-            <p-select
+            <z-select
               inputId="txn-category"
               [(ngModel)]="form.categoryId"
               [options]="availableCategories()"
@@ -118,7 +118,7 @@ import { CatalogStoreService } from '../catalog/catalog-store.service';
 
           <div class="flex flex-col gap-1.5">
             <label for="txn-beneficiary" class="text-sm font-medium">Beneficiário</label>
-            <p-select
+            <z-select
               inputId="txn-beneficiary"
               [(ngModel)]="form.beneficiaryId"
               [options]="availableBeneficiaries()"
@@ -135,28 +135,27 @@ import { CatalogStoreService } from '../catalog/catalog-store.service';
           <label for="txn-notes" class="text-sm font-medium">Observações</label>
           <textarea
             id="txn-notes"
-            pTextarea
+            zTextarea
             [(ngModel)]="form.notes"
             rows="2"
             maxlength="500"
             placeholder="Anotações livres (ex.: detalhes da fatura)"
-            class="w-full"
           ></textarea>
         </div>
       </div>
 
       <ng-template #footer>
         <div class="flex justify-end gap-2">
-          <p-button label="Cancelar" severity="secondary" [text]="true" (onClick)="visibleChange.emit(false)" />
-          <p-button
+          <z-button label="Cancelar" variant="ghost" (buttonClick)="visibleChange.emit(false)" />
+          <z-button
             label="Salvar"
             data-testid="txn-save-btn"
             [disabled]="!isValid()"
-            (onClick)="submit()"
+            (buttonClick)="submit()"
           />
         </div>
       </ng-template>
-    </p-dialog>
+    </z-dialog>
   `,
 })
 export class TransactionFormDrawerComponent {

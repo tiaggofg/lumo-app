@@ -17,7 +17,7 @@ O **Lumo** é uma aplicação web full-stack de controle financeiro pessoal e fa
 ```text
 lumo-app/
 ├── backend/                # Java 25 + Quarkus 3.33 LTS + Maven (Clean Architecture + DDD)
-├── frontend/               # Angular v22 (Standalone + Signals) + Tailwind CSS + PrimeNG + Chart.js
+├── frontend/               # Angular v22 (Standalone + Signals) + Tailwind CSS v4 + ZardUI (100% MIT) + Chart.js
 ├── docker-compose.yml      # PostgreSQL 17 local (lumo_db)
 ├── docs/                   # Documentação técnica e ADRs
 ├── .specs/                 # Spec-Driven Development (STATE.md e features/)
@@ -25,7 +25,7 @@ lumo-app/
 ```
 
 - **Backend**: Java 25 + Quarkus `3.33.4.2` (LTS) + Maven (`./mvnw`), Hibernate ORM, Liquibase (SQL formatado), SmallRye OpenAPI, SmallRye Health.
-- **Frontend**: Angular v22 (Standalone Components + Signals), Tailwind CSS, PrimeNG v22 (componentes MIT/gratuitos), Chart.js.
+- **Frontend**: Angular v22 (Standalone Components + Signals), Tailwind CSS v4, componentes **ZardUI (estilo shadcn/ui para Angular — 100% MIT, zero PrimeNG)** em `frontend/src/app/shared/ui/`, Chart.js (`<z-chart-container>`).
 - **Persistência**: PostgreSQL 17 (`lumo_db`).
 - **Testes**: JUnit 5, AssertJ, ArchUnit, Mockito, RestAssured + Testcontainers (backend); Vitest/Karma (frontend unit); Playwright (E2E desktop e mobile).
 

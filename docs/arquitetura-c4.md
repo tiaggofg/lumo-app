@@ -11,7 +11,7 @@ flowchart LR
 
 ```mermaid
 flowchart TB
-  SPA["Frontend SPA — Angular v22 + PrimeNG + Tailwind"] -->|HTTP JSON /api/v1| API["Backend API — Java 25 + Quarkus 3.33 LTS"]
+  SPA["Frontend SPA — Angular v22 + ZardUI (100% MIT) + Tailwind CSS v4"] -->|HTTP JSON /api/v1| API["Backend API — Java 25 + Quarkus 3.33 LTS"]
   API -->|JDBC / Liquibase| DB[("PostgreSQL 17 (lumo_db)")]
 ```
 
@@ -35,15 +35,16 @@ flowchart TD
 - `@Command` e `@Query` só podem ser usados em `..application..`.
 - Nenhum `AggregateRoot` em `..domain..` pode possuir anotações JPA (`@Entity`, `@Table`).
 
-## 4. Arquitetura do Frontend (`AD-008`, `AD-009`)
+## 4. Arquitetura do Frontend (`AD-009`, `AD-010`)
 
 ```mermaid
 flowchart LR
-  Shell["AppShellComponent (Full-Width w-full + Royal Indigo Nav)"] --> Dash["/dashboard — DashboardPageComponent (KPIs + 4 Gráficos Multicoloridos)"]
+  Shell["AppShellComponent (h-dvh Sticky Dark Sidebar + Collapsible w-20 Rail + <app-lumo-logo>)"] --> Dash["/dashboard — DashboardPageComponent (KPIs + 4 <z-chart-container> shadcn Charts)"]
   Shell --> Budgets["/budgets — BudgetListPageComponent"]
-  Shell --> Detail["/budgets/:id — BudgetDetailPageComponent (Tabela + Tooltip Status 1-clique)"]
+  Shell --> Detail["/budgets/:id — BudgetDetailPageComponent (Tabela + [zTooltip] Status 1-clique)"]
   Shell --> Rec["/recurrences — RecurrencesPageComponent"]
   Shell --> Cat["/catalog — CatalogPageComponent"]
+  Shell --> ZUI["shared/ui/ — ZardUI Primitives (z-button, z-dialog, z-confirm-dialog, z-toast-viewport, z-select, z-input-number)"]
   Dash --> Store["BudgetsStoreService (Signals)"]
   Budgets --> Store
   Detail --> Store

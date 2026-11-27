@@ -2,7 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { ZConfirmService } from '../../shared/ui';
 import { BudgetListPageComponent } from './budget-list-page.component';
 import { BudgetsStoreService } from './budgets-store.service';
 
@@ -12,7 +12,7 @@ describe('BudgetListPageComponent', () => {
   let store: BudgetsStoreService;
   let router: Router;
   let httpMock: HttpTestingController;
-  let confirmationService: ConfirmationService;
+  let confirmService: ZConfirmService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -21,8 +21,6 @@ describe('BudgetListPageComponent', () => {
         provideRouter([]),
         provideHttpClient(),
         provideHttpClientTesting(),
-        ConfirmationService,
-        MessageService,
       ],
     });
     fixture = TestBed.createComponent(BudgetListPageComponent);
@@ -30,7 +28,7 @@ describe('BudgetListPageComponent', () => {
     store = TestBed.inject(BudgetsStoreService);
     router = TestBed.inject(Router);
     httpMock = TestBed.inject(HttpTestingController);
-    confirmationService = TestBed.inject(ConfirmationService);
+    confirmService = TestBed.inject(ZConfirmService);
   });
 
   afterEach(() => {
@@ -90,7 +88,7 @@ describe('BudgetListPageComponent', () => {
     component.openBudget('b-1');
     expect(navSpy).toHaveBeenCalledTimes(2);
 
-    const confirmSpy = vi.spyOn(confirmationService, 'confirm');
+    const confirmSpy = vi.spyOn(confirmService, 'confirm');
     component.confirmDelete(new MouseEvent('click'), mockItem);
     expect(confirmSpy).toHaveBeenCalled();
 

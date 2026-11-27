@@ -2,8 +2,8 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { ConfirmationService, MessageService } from 'primeng/api';
 import { Transaction } from '../../core/models/api.models';
+import { ZConfirmService } from '../../shared/ui';
 import { CatalogStoreService } from '../catalog/catalog-store.service';
 import { BudgetDetailPageComponent } from './budget-detail-page.component';
 import { BudgetsStoreService } from './budgets-store.service';
@@ -13,7 +13,7 @@ describe('BudgetDetailPageComponent', () => {
   let component: BudgetDetailPageComponent;
   let store: BudgetsStoreService;
   let catalogStore: CatalogStoreService;
-  let confirmationService: ConfirmationService;
+  let confirmService: ZConfirmService;
 
   const sampleTxn: Transaction = {
     id: 't1',
@@ -44,8 +44,6 @@ describe('BudgetDetailPageComponent', () => {
         provideRouter([]),
         provideHttpClient(),
         provideHttpClientTesting(),
-        ConfirmationService,
-        MessageService,
       ],
     });
     fixture = TestBed.createComponent(BudgetDetailPageComponent);
@@ -53,7 +51,7 @@ describe('BudgetDetailPageComponent', () => {
     component = fixture.componentInstance;
     store = TestBed.inject(BudgetsStoreService);
     catalogStore = TestBed.inject(CatalogStoreService);
-    confirmationService = TestBed.inject(ConfirmationService);
+    confirmService = TestBed.inject(ZConfirmService);
   });
 
   it('should render summary, transactions and delegate actions to store', async () => {
@@ -125,7 +123,7 @@ describe('BudgetDetailPageComponent', () => {
     await component.onEstimateConfirmed({ amount: 195.64, targetStatus: 'PENDING' });
     expect(confirmEstSpy).toHaveBeenCalled();
 
-    const confirmSpy = vi.spyOn(confirmationService, 'confirm');
+    const confirmSpy = vi.spyOn(confirmService, 'confirm');
     component.confirmDeleteTransaction(sampleTxn);
     expect(confirmSpy).toHaveBeenCalled();
   });
@@ -206,7 +204,8 @@ describe('BudgetDetailPageComponent', () => {
     expect(toggleSalario?.getAttribute('data-tooltip')).toBe('Clique para reverter para Pendente');
     expect(toggleBonus?.getAttribute('data-tooltip')).toBe('Clique para marcar como Recebido');
 
-    // 5. Zero emerald-* classes
+    // 5. Table header uses bg-slate-100/80 for visual depth and zero emerald-* classes
+    expect(hostEl.innerHTML).toContain('bg-slate-100/80');
     expect(hostEl.innerHTML).not.toContain('emerald-');
   });
 });
