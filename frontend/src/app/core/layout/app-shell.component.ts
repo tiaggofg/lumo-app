@@ -3,13 +3,23 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { LumoLogoComponent, ZTooltipDirective } from '../../shared/ui';
 import { AuthService } from '../auth/auth.service';
 import { ThemeService } from '../services/theme.service';
+import { UserProfilePopoverComponent } from './user-profile-popover.component';
 
 export const SIDEBAR_COLLAPSED_STORAGE_KEY = 'lumo-sidebar-collapsed';
+
+type ActiveProfilePopover = 'desktop' | 'mobile' | null;
 
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, LumoLogoComponent, ZTooltipDirective],
+  imports: [
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    LumoLogoComponent,
+    ZTooltipDirective,
+    UserProfilePopoverComponent,
+  ],
   template: `
     <div class="min-h-screen flex flex-col lg:flex-row bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
       <!-- Desktop Sidebar (Fixed 100dvh, Dark Surface in Light & Dark Mode, Collapsible Rail) -->
@@ -17,7 +27,7 @@ export const SIDEBAR_COLLAPSED_STORAGE_KEY = 'lumo-sidebar-collapsed';
         data-testid="desktop-sidebar"
         [attr.data-collapsed]="sidebarCollapsed()"
         [class]="
-          'hidden lg:flex lg:flex-col h-dvh sticky top-0 overflow-y-auto shrink-0 select-none bg-slate-900 text-slate-100 border-r border-slate-800 transition-[width] duration-200 ease-in-out ' +
+          'hidden lg:flex lg:flex-col h-dvh sticky top-0 z-30 overflow-visible shrink-0 select-none bg-slate-900 text-slate-100 border-r border-slate-800 transition-[width] duration-200 ease-in-out ' +
           (sidebarCollapsed() ? 'lg:w-20' : 'lg:w-68')
         "
       >
@@ -78,8 +88,11 @@ export const SIDEBAR_COLLAPSED_STORAGE_KEY = 'lumo-sidebar-collapsed';
           }
         </nav>
 
-        <!-- Sidebar Footer: Expand Button (when collapsed) + Theme Toggle + User Profile & Logout -->
-        <div class="p-3 border-t border-slate-800/90 shrink-0 space-y-1.5">
+        <!-- Sidebar Footer: Expand Button (when collapsed) + Compact Avatar & Theme Row -->
+        <div
+          data-testid="sidebar-footer-desktop"
+          class="p-3.5 border-t border-slate-800/90 shrink-0 space-y-2.5"
+        >
           @if (sidebarCollapsed()) {
             <button
               type="button"
@@ -94,87 +107,82 @@ export const SIDEBAR_COLLAPSED_STORAGE_KEY = 'lumo-sidebar-collapsed';
             </button>
           }
 
-          <button
-            type="button"
-            data-testid="theme-toggle-desktop"
-            (click)="themeService.toggle()"
-            [zTooltip]="
-              sidebarCollapsed()
-                ? (themeService.isDark() ? 'Modo Claro' : 'Modo Escuro')
-                : ''
-            "
-            tooltipPosition="right"
+          <div
+            data-testid="sidebar-footer-controls-desktop"
             [class]="
-              'w-full flex items-center rounded-xl text-[15px] text-slate-300 hover:bg-slate-800/80 hover:text-white transition-colors cursor-pointer ' +
-              (sidebarCollapsed() ? 'justify-center py-3 px-0' : 'justify-between px-3.5 py-3')
+              sidebarCollapsed()
+                ? 'flex flex-col items-center gap-2.5'
+                : 'flex items-center justify-between gap-2'
             "
-            [attr.aria-label]="themeService.isDark() ? 'Ativar modo claro' : 'Ativar modo escuro'"
           >
-            <span class="flex items-center gap-3">
-              <i
-                [class]="themeService.isDark() ? 'pi pi-sun text-amber-400' : 'pi pi-moon text-sky-400'"
-                aria-hidden="true"
-              ></i>
-              @if (!sidebarCollapsed()) {
-                <span>{{ themeService.isDark() ? 'Modo Claro' : 'Modo Escuro' }}</span>
-              }
-            </span>
-          </button>
+            @if (authService.user(); as currentUser) {
+              <div class="relative">
+                <button
+                  type="button"
+                  data-testid="user-profile-desktop"
+                  data-profile-popover-trigger
+                  (click)="toggleProfileMenu('desktop')"
+                  [zTooltip]="
+                    sidebarCollapsed() && profileMenuOpen() !== 'desktop' ? currentUser.name : ''
+                  "
+                  tooltipPosition="right"
+                  aria-haspopup="dialog"
+                  [attr.aria-expanded]="profileMenuOpen() === 'desktop'"
+                  [attr.aria-label]="'Menu da conta de ' + currentUser.name"
+                  class="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center ring-1 ring-slate-700/80 hover:ring-indigo-400/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 transition-all cursor-pointer shrink-0"
+                >
+                  @if (currentUser.avatarUrl) {
+                    <img
+                      [src]="currentUser.avatarUrl"
+                      [alt]="currentUser.name"
+                      referrerpolicy="no-referrer"
+                      class="w-full h-full object-cover"
+                    />
+                  } @else {
+                    <span
+                      data-testid="user-avatar-fallback-desktop"
+                      class="w-full h-full bg-indigo-600/90 text-white text-xs font-bold flex items-center justify-center"
+                      aria-hidden="true"
+                    >
+                      {{ userInitials() }}
+                    </span>
+                  }
+                </button>
 
-          @if (authService.user(); as currentUser) {
-            <div class="pt-2 mt-2 border-t border-slate-800/90 space-y-1.5">
-              <div
-                data-testid="user-profile-desktop"
-                [zTooltip]="sidebarCollapsed() ? currentUser.name + ' (' + currentUser.email + ')' : ''"
-                tooltipPosition="right"
-                [class]="
-                  'flex items-center rounded-xl ' +
-                  (sidebarCollapsed() ? 'justify-center py-1.5' : 'gap-3 px-2.5 py-2')
-                "
-              >
-                @if (currentUser.avatarUrl) {
-                  <img
-                    [src]="currentUser.avatarUrl"
-                    [alt]="currentUser.name"
-                    referrerpolicy="no-referrer"
-                    class="w-9 h-9 rounded-full object-cover ring-2 ring-indigo-500/40 shrink-0"
+                @if (profileMenuOpen() === 'desktop') {
+                  <app-user-profile-popover
+                    [user]="currentUser"
+                    [position]="sidebarCollapsed() ? 'right' : 'above'"
+                    (closed)="closeProfileMenu()"
+                    (logout)="onLogout()"
                   />
-                } @else {
-                  <span
-                    class="w-9 h-9 rounded-full bg-indigo-600/90 text-white text-xs font-bold flex items-center justify-center shrink-0 ring-2 ring-indigo-400/30"
-                    aria-hidden="true"
-                  >
-                    {{ userInitials() }}
-                  </span>
-                }
-
-                @if (!sidebarCollapsed()) {
-                  <div class="min-w-0 flex-1">
-                    <p class="text-sm font-semibold text-white truncate">{{ currentUser.name }}</p>
-                    <p class="text-xs text-slate-400 truncate">{{ currentUser.email }}</p>
-                  </div>
                 }
               </div>
+            }
 
-              <button
-                type="button"
-                data-testid="logout-button-desktop"
-                (click)="onLogout()"
-                [zTooltip]="sidebarCollapsed() ? 'Sair' : ''"
-                tooltipPosition="right"
-                aria-label="Sair"
+            <button
+              type="button"
+              data-testid="theme-toggle-desktop"
+              (click)="themeService.toggle()"
+              [zTooltip]="
+                sidebarCollapsed()
+                  ? (themeService.isDark() ? 'Modo Claro' : 'Modo Escuro')
+                  : ''
+              "
+              tooltipPosition="right"
+              [attr.aria-label]="themeService.isDark() ? 'Ativar modo claro' : 'Ativar modo escuro'"
+              class="w-10 h-10 rounded-xl border border-slate-700/80 bg-slate-950/70 hover:bg-slate-800/90 hover:border-slate-600 text-slate-100 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+            >
+              <i
                 [class]="
-                  'w-full flex items-center rounded-xl text-sm text-slate-300 hover:text-rose-300 hover:bg-rose-950/50 transition-colors cursor-pointer ' +
-                  (sidebarCollapsed() ? 'justify-center py-2.5 px-0' : 'gap-3 px-3.5 py-2.5')
+                  themeService.isDark()
+                    ? 'pi pi-sun text-amber-400 text-base'
+                    : 'pi pi-moon text-slate-100 text-base'
                 "
-              >
-                <i class="pi pi-sign-out text-base shrink-0" aria-hidden="true"></i>
-                @if (!sidebarCollapsed()) {
-                  <span>Sair</span>
-                }
-              </button>
-            </div>
-          }
+                aria-hidden="true"
+              ></i>
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -184,7 +192,7 @@ export const SIDEBAR_COLLAPSED_STORAGE_KEY = 'lumo-sidebar-collapsed';
           <button
             type="button"
             data-testid="mobile-menu-toggle"
-            (click)="mobileMenuOpen.set(!mobileMenuOpen())"
+            (click)="toggleMobileMenu()"
             class="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 cursor-pointer"
             aria-label="Abrir menu"
           >
@@ -194,16 +202,6 @@ export const SIDEBAR_COLLAPSED_STORAGE_KEY = 'lumo-sidebar-collapsed';
             <app-lumo-logo variant="full" size="sm" tone="dark-surface" />
           </a>
         </div>
-
-        <button
-          type="button"
-          data-testid="theme-toggle-mobile"
-          (click)="themeService.toggle()"
-          class="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 cursor-pointer"
-          [attr.aria-label]="themeService.isDark() ? 'Ativar modo claro' : 'Ativar modo escuro'"
-        >
-          <i [class]="themeService.isDark() ? 'pi pi-sun text-amber-400 text-lg' : 'pi pi-moon text-sky-400 text-lg'" aria-hidden="true"></i>
-        </button>
       </header>
 
       <!-- Mobile Slide-out Drawer -->
@@ -211,71 +209,101 @@ export const SIDEBAR_COLLAPSED_STORAGE_KEY = 'lumo-sidebar-collapsed';
         <div class="lg:hidden fixed inset-0 z-40 flex">
           <div
             class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs"
-            (click)="mobileMenuOpen.set(false)"
+            (click)="closeMobileMenu()"
             aria-hidden="true"
           ></div>
           <nav
             data-testid="mobile-drawer"
-            class="relative z-50 w-68 max-w-[82vw] bg-slate-900 text-slate-100 border-r border-slate-800 h-full p-4 flex flex-col gap-1.5 shadow-2xl"
+            class="relative z-50 w-68 max-w-[82vw] bg-slate-900 text-slate-100 border-r border-slate-800 h-full p-4 flex flex-col gap-1.5 shadow-2xl overflow-visible"
           >
             <div class="flex items-center justify-between pb-4 mb-2 border-b border-slate-800">
               <app-lumo-logo variant="full" size="sm" subtitle="Controle Financeiro" tone="dark-surface" />
               <button
                 type="button"
-                (click)="mobileMenuOpen.set(false)"
+                (click)="closeMobileMenu()"
                 class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer"
                 aria-label="Fechar menu"
               >
                 <i class="pi pi-times" aria-hidden="true"></i>
               </button>
             </div>
-            @for (item of navItems; track item.route) {
-              <a
-                [routerLink]="item.route"
-                routerLinkActive="bg-indigo-600 text-white font-semibold"
-                (click)="mobileMenuOpen.set(false)"
-                class="flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] text-slate-300 hover:bg-slate-800/80 hover:text-white transition-colors"
-              >
-                <i [class]="item.icon + ' text-base'" aria-hidden="true"></i>
-                <span>{{ item.label }}</span>
-              </a>
-            }
 
-            @if (authService.user(); as currentUser) {
-              <div class="mt-auto pt-4 border-t border-slate-800 space-y-2">
-                <div data-testid="user-profile-mobile" class="flex items-center gap-3 px-2 py-1.5">
-                  @if (currentUser.avatarUrl) {
-                    <img
-                      [src]="currentUser.avatarUrl"
-                      [alt]="currentUser.name"
-                      referrerpolicy="no-referrer"
-                      class="w-9 h-9 rounded-full object-cover ring-2 ring-indigo-500/40 shrink-0"
-                    />
-                  } @else {
-                    <span
-                      class="w-9 h-9 rounded-full bg-indigo-600/90 text-white text-xs font-bold flex items-center justify-center shrink-0"
-                      aria-hidden="true"
-                    >
-                      {{ userInitials() }}
-                    </span>
-                  }
-                  <div class="min-w-0 flex-1">
-                    <p class="text-sm font-semibold text-white truncate">{{ currentUser.name }}</p>
-                    <p class="text-xs text-slate-400 truncate">{{ currentUser.email }}</p>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  data-testid="logout-button-mobile"
-                  (click)="onLogout()"
-                  class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-slate-300 hover:text-rose-300 hover:bg-rose-950/50 transition-colors cursor-pointer"
+            <div class="flex-1 overflow-y-auto flex flex-col gap-1.5">
+              @for (item of navItems; track item.route) {
+                <a
+                  [routerLink]="item.route"
+                  routerLinkActive="bg-indigo-600 text-white font-semibold"
+                  (click)="closeMobileMenu()"
+                  class="flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] text-slate-300 hover:bg-slate-800/80 hover:text-white transition-colors"
                 >
-                  <i class="pi pi-sign-out text-base" aria-hidden="true"></i>
-                  <span>Sair</span>
-                </button>
-              </div>
-            }
+                  <i [class]="item.icon + ' text-base'" aria-hidden="true"></i>
+                  <span>{{ item.label }}</span>
+                </a>
+              }
+            </div>
+
+            <div
+              data-testid="sidebar-footer-mobile"
+              class="mt-auto pt-4 border-t border-slate-800 flex items-center justify-between gap-2"
+            >
+              @if (authService.user(); as currentUser) {
+                <div class="relative">
+                  <button
+                    type="button"
+                    data-testid="user-profile-mobile"
+                    data-profile-popover-trigger
+                    (click)="toggleProfileMenu('mobile')"
+                    aria-haspopup="dialog"
+                    [attr.aria-expanded]="profileMenuOpen() === 'mobile'"
+                    [attr.aria-label]="'Menu da conta de ' + currentUser.name"
+                    class="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center ring-1 ring-slate-700/80 hover:ring-indigo-400/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 transition-all cursor-pointer shrink-0"
+                  >
+                    @if (currentUser.avatarUrl) {
+                      <img
+                        [src]="currentUser.avatarUrl"
+                        [alt]="currentUser.name"
+                        referrerpolicy="no-referrer"
+                        class="w-full h-full object-cover"
+                      />
+                    } @else {
+                      <span
+                        data-testid="user-avatar-fallback-mobile"
+                        class="w-full h-full bg-indigo-600/90 text-white text-xs font-bold flex items-center justify-center"
+                        aria-hidden="true"
+                      >
+                        {{ userInitials() }}
+                      </span>
+                    }
+                  </button>
+
+                  @if (profileMenuOpen() === 'mobile') {
+                    <app-user-profile-popover
+                      [user]="currentUser"
+                      position="above"
+                      (closed)="closeProfileMenu()"
+                      (logout)="onLogout()"
+                    />
+                  }
+                </div>
+              }
+
+              <button
+                type="button"
+                data-testid="theme-toggle-mobile"
+                (click)="themeService.toggle()"
+                [attr.aria-label]="themeService.isDark() ? 'Ativar modo claro' : 'Ativar modo escuro'"
+                class="w-10 h-10 rounded-xl border border-slate-700/80 bg-slate-950/70 hover:bg-slate-800/90 hover:border-slate-600 text-slate-100 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+              >
+                <i
+                  [class]="
+                    themeService.isDark()
+                      ? 'pi pi-sun text-amber-400 text-base'
+                      : 'pi pi-moon text-slate-100 text-base'
+                  "
+                  aria-hidden="true"
+                ></i>
+              </button>
+            </div>
           </nav>
         </div>
       }
@@ -292,6 +320,7 @@ export class AppShellComponent {
   readonly authService = inject(AuthService);
   readonly mobileMenuOpen = signal(false);
   readonly sidebarCollapsed = signal(this.readInitialCollapsedState());
+  readonly profileMenuOpen = signal<ActiveProfilePopover>(null);
 
   readonly userInitials = computed(() => {
     const user = this.authService.user();
@@ -314,6 +343,7 @@ export class AppShellComponent {
   ];
 
   toggleSidebar(): void {
+    this.closeProfileMenu();
     const next = !this.sidebarCollapsed();
     this.sidebarCollapsed.set(next);
     try {
@@ -323,7 +353,29 @@ export class AppShellComponent {
     }
   }
 
+  toggleMobileMenu(): void {
+    const next = !this.mobileMenuOpen();
+    if (!next) {
+      this.closeProfileMenu();
+    }
+    this.mobileMenuOpen.set(next);
+  }
+
+  closeMobileMenu(): void {
+    this.closeProfileMenu();
+    this.mobileMenuOpen.set(false);
+  }
+
+  toggleProfileMenu(target: 'desktop' | 'mobile'): void {
+    this.profileMenuOpen.update((current) => (current === target ? null : target));
+  }
+
+  closeProfileMenu(): void {
+    this.profileMenuOpen.set(null);
+  }
+
   async onLogout(): Promise<void> {
+    this.closeProfileMenu();
     this.mobileMenuOpen.set(false);
     await this.authService.logout();
   }

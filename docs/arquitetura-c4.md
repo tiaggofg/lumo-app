@@ -38,11 +38,11 @@ flowchart TD
 - `@Command` e `@Query` só podem ser usados em `..application..`.
 - Nenhum `AggregateRoot` em `..domain..` pode possuir anotações JPA (`@Entity`, `@Table`).
 
-## 4. Arquitetura do Frontend (`AD-009`, `AD-010`)
+## 4. Arquitetura do Frontend (`AD-009`, `AD-010`, `AD-012`)
 
 ```mermaid
 flowchart LR
-  Shell["AppShellComponent (h-dvh Sticky Dark Sidebar + Collapsible w-20 Rail + <app-lumo-logo>)"] --> Dash["/dashboard — DashboardPageComponent (KPIs + 4 <z-chart-container> shadcn Charts)"]
+  Shell["AppShellComponent (h-dvh Sticky Dark Sidebar + Collapsible w-20 Rail + Compact Footer + UserProfilePopoverComponent + <app-lumo-logo>)"] --> Dash["/dashboard — DashboardPageComponent (KPIs + 4 <z-chart-container> shadcn Charts)"]
   Shell --> Budgets["/budgets — BudgetListPageComponent"]
   Shell --> Detail["/budgets/:id — BudgetDetailPageComponent (Tabela + [zTooltip] Status 1-clique)"]
   Shell --> Rec["/recurrences — RecurrencesPageComponent"]

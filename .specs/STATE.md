@@ -90,12 +90,20 @@
 - **Date**: 2026-11-27
 - **Status**: active
 
+### AD-012
+- **Decision**: No popover de perfil do rodapé da sidebar (`05-sidebar-profile-footer`), omitir `My profile`, `+ Create team` e o ícone `✓` exibidos na captura `profile-popover.png`, e traduzir `Log out` para `Sair` em português.
+- **Reason**: Pergunta: "No card/popover da foto de perfil, qual ajuste fazer nos textos e ícones em relação ao print?" — Opção escolhida pelo usuário: `Rótulo "Sair" em português; topo com quadrado de inicial + nome do usuário (sem "Create team", sem "My profile" e sem o ícone ✓)` (além da solicitação inicial "O meu perfil nao precisa aparecer agora").
+- **Trade-off**: Mantém consistência linguística (PT-BR) e evita itens sem funcionalidade ativa no produto atual, exigindo inclusão futura caso exista página de perfil ou workspaces múltiplos.
+- **Scope**: `frontend/` (`AppShellComponent` e popover de perfil).
+- **Date**: 2026-11-27
+- **Status**: active (AD-012)
+
 ## Handoff
 
-- **Feature**: `04-google-oauth-auth`
-- **Phase / Task**: Verified & Ready for Approval — `T1..T12` concluídas, todas as suítes (Backend `./mvnw verify`, Frontend lint/build/Vitest, Playwright E2E desktop/mobile e SonarQube Quality Gate) passando `OK` e `docs/`/`README.md` sincronizados
-- **Completed**: `01-lumo-mvp`, `02-ui-ux-overhaul`, `03-zardui-brand-and-shell`, `04-google-oauth-auth` (`T1..T12` aguardando aprovação de commit/push)
+- **Feature**: `05-sidebar-profile-footer`
+- **Phase / Task**: Completed (`T1..T4` implementadas, verificadas e aprovadas)
+- **Completed**: `01-lumo-mvp`, `02-ui-ux-overhaul`, `03-zardui-brand-and-shell`, `04-google-oauth-auth`, `05-sidebar-profile-footer`
 - **In-progress** (file:line): none
-- **Next step**: Aguardar aprovação explícita do usuário para realizar `git add`, `git commit` (Conventional Commits) e `git push`
+- **Next step**: Pronto para próxima feature
 - **Blockers**: none
 - **Branch**: main

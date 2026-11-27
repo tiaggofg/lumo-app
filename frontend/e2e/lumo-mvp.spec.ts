@@ -416,8 +416,14 @@ test.describe('Lumo MVP Full-Stack E2E', () => {
     await incomeLegendBtn.click();
     await expect(incomeLegendBtn).toHaveAttribute('aria-pressed', 'false');
 
-    const toggleBtn = page.getByTestId(isDesktop ? 'theme-toggle-desktop' : 'theme-toggle-mobile');
-    await toggleBtn.click();
+    if (isDesktop) {
+      await page.getByTestId('theme-toggle-desktop').click();
+    } else {
+      await expect(page.locator('header').getByTestId('theme-toggle-mobile')).toHaveCount(0);
+      await page.getByTestId('mobile-menu-toggle').click();
+      await page.getByTestId('mobile-drawer').getByTestId('theme-toggle-mobile').click();
+      await page.getByLabel('Fechar menu').click();
+    }
 
     await expect(page.locator('html')).toHaveClass(/dark/);
     await page.reload();

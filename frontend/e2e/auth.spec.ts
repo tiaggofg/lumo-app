@@ -31,13 +31,65 @@ test.describe('Lumo Authentication E2E', () => {
     await page.getByTestId('dev-login-button').click();
     await expect(page).toHaveURL(/\/budgets$/);
 
-    // Verify user profile in sidebar (desktop) or drawer (mobile)
+    // Verify compact footer and user profile popover in sidebar (desktop) or drawer (mobile)
     const isDesktop = (page.viewportSize()?.width ?? 1440) >= 1024;
     if (isDesktop) {
-      await expect(page.getByTestId('user-profile-desktop')).toContainText('Desenvolvedor Lumo');
+      const avatarBtn = page.getByTestId('user-profile-desktop');
+      const themeBtn = page.getByTestId('theme-toggle-desktop');
+      await expect(avatarBtn).toBeVisible();
+      await expect(themeBtn).toBeVisible();
+      await expect(avatarBtn).toHaveAttribute('aria-expanded', 'false');
+
+      // Avatar and theme toggle share the same row in expanded desktop footer
+      const avatarBox = await avatarBtn.boundingBox();
+      const themeBox = await themeBtn.boundingBox();
+      expect(Math.abs((avatarBox?.y ?? 0) - (themeBox?.y ?? 0))).toBeLessThanOrEqual(4);
+
+      // Open profile popover
+      await avatarBtn.click();
+      await expect(avatarBtn).toHaveAttribute('aria-expanded', 'true');
+      const popover = page.getByTestId('user-profile-popover');
+      await expect(popover).toBeVisible();
+      await expect(popover.getByTestId('profile-popover-initial')).toHaveText('D');
+      await expect(popover.getByTestId('profile-popover-name')).toContainText('Desenvolvedor Lumo');
+      await expect(popover.getByTestId('profile-popover-email')).toContainText('dev@lumo.local');
+      await expect(popover.getByTestId('profile-popover-logout')).toHaveText('Sair');
+      await expect(popover).not.toContainText('My profile');
+      await expect(popover).not.toContainText('Create team');
+
+      // Close popover with Escape
+      await page.keyboard.press('Escape');
+      await expect(popover).toHaveCount(0);
+      await expect(avatarBtn).toHaveAttribute('aria-expanded', 'false');
+
+      // Open and close by clicking outside
+      await avatarBtn.click();
+      await expect(popover).toBeVisible();
+      await page.locator('main').click({ position: { x: 20, y: 20 } });
+      await expect(popover).toHaveCount(0);
     } else {
+      await expect(page.locator('header').getByTestId('theme-toggle-mobile')).toHaveCount(0);
       await page.getByTestId('mobile-menu-toggle').click();
-      await expect(page.getByTestId('user-profile-mobile')).toContainText('Desenvolvedor Lumo');
+      const drawer = page.getByTestId('mobile-drawer');
+      const avatarBtn = drawer.getByTestId('user-profile-mobile');
+      const themeBtn = drawer.getByTestId('theme-toggle-mobile');
+      await expect(avatarBtn).toBeVisible();
+      await expect(themeBtn).toBeVisible();
+
+      const avatarBox = await avatarBtn.boundingBox();
+      const themeBox = await themeBtn.boundingBox();
+      expect(Math.abs((avatarBox?.y ?? 0) - (themeBox?.y ?? 0))).toBeLessThanOrEqual(4);
+
+      await avatarBtn.click();
+      const popover = drawer.getByTestId('user-profile-popover');
+      await expect(popover).toBeVisible();
+      await expect(popover.getByTestId('profile-popover-initial')).toHaveText('D');
+      await expect(popover.getByTestId('profile-popover-name')).toContainText('Desenvolvedor Lumo');
+      await expect(popover.getByTestId('profile-popover-email')).toContainText('dev@lumo.local');
+      await expect(popover).not.toContainText('My profile');
+
+      await page.keyboard.press('Escape');
+      await expect(popover).toHaveCount(0);
       await page.getByLabel('Fechar menu').click();
     }
 
@@ -49,12 +101,14 @@ test.describe('Lumo Authentication E2E', () => {
     await page.goto('/login');
     await expect(page).toHaveURL(/\/dashboard$/);
 
-    // Logout from desktop sidebar or mobile drawer
+    // Logout from profile popover (desktop sidebar or mobile drawer)
     if (isDesktop) {
-      await page.getByTestId('logout-button-desktop').click();
+      await page.getByTestId('user-profile-desktop').click();
+      await page.getByTestId('profile-popover-logout').click();
     } else {
       await page.getByTestId('mobile-menu-toggle').click();
-      await page.getByTestId('logout-button-mobile').click();
+      await page.getByTestId('user-profile-mobile').click();
+      await page.getByTestId('profile-popover-logout').click();
     }
 
     await expect(page).toHaveURL(/\/login$/);
