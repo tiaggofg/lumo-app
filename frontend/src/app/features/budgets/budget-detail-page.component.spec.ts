@@ -208,4 +208,87 @@ describe('BudgetDetailPageComponent', () => {
     expect(hostEl.innerHTML).toContain('bg-slate-100/80');
     expect(hostEl.innerHTML).not.toContain('emerald-');
   });
+
+  it('should place expense paid progress above KPI footer, anchor all three KPI footers with mt-auto, and enable search on category/beneficiary filters', () => {
+    vi.spyOn(catalogStore, 'loadAll').mockResolvedValue();
+    vi.spyOn(store, 'loadBudgetDetail').mockResolvedValue();
+
+    catalogStore.categories.set([
+      { id: 'c1', name: 'Moradia', type: 'EXPENSE', color: '#4F46E5', icon: null, active: true, createdAt: '', updatedAt: '' },
+      { id: 'c2', name: 'Alimentação', type: 'EXPENSE', color: '#0284C7', icon: null, active: true, createdAt: '', updatedAt: '' },
+    ]);
+    catalogStore.beneficiaries.set([
+      { id: 'b1', name: 'Família', active: true, createdAt: '', updatedAt: '' },
+      { id: 'b2', name: 'Cônjuge', active: true, createdAt: '', updatedAt: '' },
+    ]);
+
+    store.currentDetail.set({
+      id: 'b1',
+      competenceMonth: '2026-11',
+      summary: {
+        plannedIncome: 6000,
+        realizedIncome: 6000,
+        plannedExpense: 2000,
+        realizedExpense: 1500,
+        plannedBalance: 4000,
+        realizedBalance: 4500,
+      },
+      statusCounts: { estimated: 0, pending: 1, settled: 2 },
+      expensesByCategory: [],
+      expensesByBeneficiary: [],
+      createdAt: '',
+      updatedAt: '',
+    });
+    fixture.detectChanges();
+
+    const hostEl: HTMLElement = fixture.nativeElement;
+
+    const incomeFooter = hostEl.querySelector('[data-testid="kpi-footer-income"]') as HTMLElement;
+    const expenseFooter = hostEl.querySelector('[data-testid="kpi-footer-expense"]') as HTMLElement;
+    const balanceFooter = hostEl.querySelector('[data-testid="kpi-footer-balance"]') as HTMLElement;
+    const progressEl = hostEl.querySelector('[data-testid="expense-paid-progress"]') as HTMLElement;
+
+    expect(incomeFooter).toBeTruthy();
+    expect(expenseFooter).toBeTruthy();
+    expect(balanceFooter).toBeTruthy();
+    expect(progressEl).toBeTruthy();
+
+    expect(incomeFooter.className).toContain('mt-auto');
+    expect(expenseFooter.className).toContain('mt-auto');
+    expect(balanceFooter.className).toContain('mt-auto');
+
+    // Progress bar must precede the expense footer in DOM order and render inline with percentage
+    const relPos = progressEl.compareDocumentPosition(expenseFooter);
+    expect(relPos & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(progressEl.className).toContain('flex');
+    expect(progressEl.className).toContain('items-center');
+    expect(progressEl.textContent).toContain('75% pago');
+
+    // Status filter has no search input
+    const statusTrigger = hostEl.querySelector('#filter-status') as HTMLButtonElement;
+    statusTrigger.click();
+    fixture.detectChanges();
+    expect(hostEl.querySelector('[data-testid="z-select-search"]')).toBeNull();
+    statusTrigger.click();
+    fixture.detectChanges();
+
+    // Category filter has search input and filters without accents
+    const catTrigger = hostEl.querySelector('#filter-category') as HTMLButtonElement;
+    catTrigger.click();
+    fixture.detectChanges();
+    const catSearch = hostEl.querySelector('[data-testid="z-select-search"]') as HTMLInputElement;
+    expect(catSearch).toBeTruthy();
+    catSearch.value = 'alimentacao';
+    catSearch.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    expect(hostEl.querySelectorAll('[role="option"]')).toHaveLength(1);
+    catTrigger.click();
+    fixture.detectChanges();
+
+    // Beneficiary filter has search input
+    const benTrigger = hostEl.querySelector('#filter-beneficiary') as HTMLButtonElement;
+    benTrigger.click();
+    fixture.detectChanges();
+    expect(hostEl.querySelector('[data-testid="z-select-search"]')).toBeTruthy();
+  });
 });

@@ -90,6 +90,8 @@ export interface DashboardBreakdownEntry extends BreakdownItem {
                 optionLabel="label"
                 optionValue="id"
                 placeholder="Selecionar mês"
+                [searchable]="true"
+                searchPlaceholder="Buscar mês..."
                 styleClass="w-full"
               />
             </div>

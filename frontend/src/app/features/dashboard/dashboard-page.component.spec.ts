@@ -282,4 +282,79 @@ describe('DashboardPageComponent', () => {
     await component.onBudgetChange(null);
     expect(loadSpy).not.toHaveBeenCalled();
   });
+
+  it('should enable searchable month selector in dashboard header', async () => {
+    const budgetsList: MonthlyBudgetListItem[] = [
+      {
+        id: 'b-mar',
+        competenceMonth: '2026-03',
+        transactionCount: 1,
+        summary: {
+          plannedIncome: 5000,
+          realizedIncome: 5000,
+          plannedExpense: 2000,
+          realizedExpense: 1000,
+          plannedBalance: 3000,
+          realizedBalance: 4000,
+        },
+        createdAt: '',
+        updatedAt: '',
+      },
+      {
+        id: 'b-nov',
+        competenceMonth: '2026-11',
+        transactionCount: 2,
+        summary: {
+          plannedIncome: 6000,
+          realizedIncome: 6000,
+          plannedExpense: 2500,
+          realizedExpense: 2500,
+          plannedBalance: 3500,
+          realizedBalance: 3500,
+        },
+        createdAt: '',
+        updatedAt: '',
+      },
+    ];
+
+    vi.spyOn(store, 'loadBudgets').mockImplementation(async () => {
+      store.budgets.set(budgetsList);
+    });
+    const loadDetailSpy = vi.spyOn(store, 'loadBudgetDetail').mockResolvedValue();
+
+    fixture.detectChanges();
+    await Promise.resolve();
+    await Promise.resolve();
+    fixture.detectChanges();
+
+    const selectorHost = fixture.nativeElement.querySelector(
+      '[data-testid="dashboard-month-selector"]'
+    ) as HTMLElement;
+    expect(selectorHost).toBeTruthy();
+
+    const trigger = selectorHost.querySelector(
+      '[data-testid="z-select-trigger"]'
+    ) as HTMLButtonElement;
+    trigger.click();
+    fixture.detectChanges();
+
+    const searchInput = selectorHost.querySelector(
+      '[data-testid="z-select-search"]'
+    ) as HTMLInputElement;
+    expect(searchInput).toBeTruthy();
+    expect(searchInput.placeholder).toBe('Buscar mês...');
+
+    // Accent-insensitive filtering ("marco" matches "Março 2026")
+    searchInput.value = 'marco';
+    searchInput.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    const options = selectorHost.querySelectorAll('[role="option"]');
+    expect(options).toHaveLength(1);
+    expect(options[0].textContent).toContain('Março 2026');
+
+    (options[0] as HTMLElement).click();
+    fixture.detectChanges();
+    expect(loadDetailSpy).toHaveBeenCalledWith('b-mar');
+  });
 });

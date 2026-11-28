@@ -112,6 +112,8 @@ import { CatalogStoreService } from '../catalog/catalog-store.service';
               optionValue="id"
               placeholder="Selecione"
               [showClear]="true"
+              [searchable]="true"
+              searchPlaceholder="Buscar categoria..."
               styleClass="w-full"
             />
           </div>
@@ -126,6 +128,8 @@ import { CatalogStoreService } from '../catalog/catalog-store.service';
               optionValue="id"
               placeholder="Selecione"
               [showClear]="true"
+              [searchable]="true"
+              searchPlaceholder="Buscar beneficiário..."
               styleClass="w-full"
             />
           </div>

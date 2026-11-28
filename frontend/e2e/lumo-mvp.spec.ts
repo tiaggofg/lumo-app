@@ -431,4 +431,281 @@ test.describe('Lumo MVP Full-Stack E2E', () => {
     await expect(page.getByTestId('chart-category')).toBeVisible();
     await expect(page.getByTestId('chart-evolution')).toBeVisible();
   });
+
+  test('UI polish: viewport-fixed searchable selects, aligned KPI footers, 3-zone recurrence cards, and slim scrollbars', async ({
+    page,
+    request,
+  }) => {
+    const isDesktop = (page.viewportSize()?.width ?? 1440) >= 1024;
+
+    // Seed two budgets so Dashboard month selector can filter across months
+    const marRes = await request.post(`${API_BASE}/budgets`, {
+      data: { competenceMonth: '2026-03' },
+    });
+    expect(marRes.ok()).toBe(true);
+
+    const novRes = await request.post(`${API_BASE}/budgets`, {
+      data: { competenceMonth: '2026-11' },
+    });
+    expect(novRes.ok()).toBe(true);
+    const novBudget: { id: string } = await novRes.json();
+
+    await request.post(`${API_BASE}/budgets/${novBudget.id}/transactions`, {
+      data: {
+        type: 'INCOME',
+        description: 'Salário UI Polish',
+        amount: 7500.0,
+        status: 'SETTLED',
+        categoryId: '10000000-0000-0000-0000-000000000010',
+        beneficiaryId: '20000000-0000-0000-0000-000000000001',
+      },
+    });
+    await request.post(`${API_BASE}/budgets/${novBudget.id}/transactions`, {
+      data: {
+        type: 'EXPENSE',
+        description: 'Aluguel UI Polish',
+        amount: 1500.0,
+        status: 'SETTLED',
+        categoryId: '10000000-0000-0000-0000-000000000001',
+        beneficiaryId: '20000000-0000-0000-0000-000000000001',
+      },
+    });
+    await request.post(`${API_BASE}/budgets/${novBudget.id}/transactions`, {
+      data: {
+        type: 'EXPENSE',
+        description: 'Água UI Polish',
+        amount: 500.0,
+        status: 'PENDING',
+        categoryId: '10000000-0000-0000-0000-000000000002',
+        beneficiaryId: '20000000-0000-0000-0000-000000000001',
+      },
+    });
+
+    // 1. Budget Detail: KPI footer alignment & progress bar above divider
+    await page.goto(`/budgets/${novBudget.id}`);
+    await expect(page.getByTestId('budget-summary-cards')).toBeVisible();
+    await expect(page.getByTestId('expense-paid-progress')).toContainText('75% pago');
+
+    const progressBox = await page.getByTestId('expense-paid-progress').boundingBox();
+    const incomeFooterBox = await page.getByTestId('kpi-footer-income').boundingBox();
+    const expenseFooterBox = await page.getByTestId('kpi-footer-expense').boundingBox();
+    const balanceFooterBox = await page.getByTestId('kpi-footer-balance').boundingBox();
+
+    expect(progressBox).toBeTruthy();
+    expect(incomeFooterBox).toBeTruthy();
+    expect(expenseFooterBox).toBeTruthy();
+    expect(balanceFooterBox).toBeTruthy();
+    expect((progressBox?.y ?? 0) + (progressBox?.height ?? 0)).toBeLessThanOrEqual(
+      (expenseFooterBox?.y ?? 0) + 1
+    );
+
+    if (isDesktop) {
+      expect(
+        Math.abs((incomeFooterBox?.y ?? 0) - (expenseFooterBox?.y ?? 0))
+      ).toBeLessThanOrEqual(2);
+      expect(
+        Math.abs((balanceFooterBox?.y ?? 0) - (expenseFooterBox?.y ?? 0))
+      ).toBeLessThanOrEqual(2);
+    }
+
+    // 2. Viewport-fixed <z-select> inside <z-dialog> (no scrollHeight increase, accent-insensitive search, Escape keeps dialog open)
+    await page.getByTestId('new-transaction-btn').click();
+    await expect(page.getByTestId('z-dialog-overlay')).toBeVisible();
+
+    const dialogBody = page.getByTestId('z-dialog-body');
+    const scrollBefore = await dialogBody.evaluate((el) => el.scrollHeight);
+
+    await page.locator('#txn-category').click();
+    const panel = page.getByTestId('z-select-panel');
+    await expect(panel).toBeVisible();
+
+    const panelMetrics = await panel.evaluate((el) => {
+      const style = window.getComputedStyle(el);
+      const rect = el.getBoundingClientRect();
+      return {
+        position: style.position,
+        top: rect.top,
+        left: rect.left,
+        right: rect.right,
+        bottom: rect.bottom,
+        vw: window.innerWidth,
+        vh: window.innerHeight,
+      };
+    });
+    expect(panelMetrics.position).toBe('fixed');
+    expect(panelMetrics.left).toBeGreaterThanOrEqual(0);
+    expect(panelMetrics.right).toBeLessThanOrEqual(panelMetrics.vw + 1);
+    expect(panelMetrics.top).toBeGreaterThanOrEqual(0);
+    expect(panelMetrics.bottom).toBeLessThanOrEqual(panelMetrics.vh + 1);
+
+    const scrollAfter = await dialogBody.evaluate((el) => el.scrollHeight);
+    expect(scrollAfter).toBe(scrollBefore);
+
+    const catSearch = page.getByTestId('z-select-search');
+    await expect(catSearch).toBeVisible();
+    await catSearch.fill('alimentacao');
+    await expect(panel.getByRole('option', { name: 'Alimentação' })).toBeVisible();
+
+    // First Escape closes only the open select popover, keeping the dialog open
+    await page.keyboard.press('Escape');
+    await expect(panel).toHaveCount(0);
+    await expect(page.getByTestId('z-dialog-overlay')).toBeVisible();
+
+    // Reopen category, filter without accent and select option
+    await page.locator('#txn-category').click();
+    await expect(page.getByTestId('z-select-search')).toHaveValue('');
+    await page.getByTestId('z-select-search').fill('alimentacao');
+    await page.getByTestId('z-select-panel').getByRole('option', { name: 'Alimentação' }).click();
+    await expect(page.locator('#txn-category')).toContainText('Alimentação');
+
+    // Beneficiary select is searchable
+    await page.locator('#txn-beneficiary').click();
+    await expect(page.getByTestId('z-select-search')).toBeVisible();
+    await page.getByTestId('z-select-search').fill('familia');
+    await page.getByTestId('z-select-panel').getByRole('option', { name: 'Família' }).click();
+    await expect(page.locator('#txn-beneficiary')).toContainText('Família');
+
+    // Short fixed select (Type) omits search input
+    await page.locator('#txn-type').click();
+    await expect(page.getByTestId('z-select-panel')).toBeVisible();
+    await expect(page.getByTestId('z-select-search')).toHaveCount(0);
+    await page.keyboard.press('Escape');
+    await expect(page.getByTestId('z-select-panel')).toHaveCount(0);
+    await expect(page.getByTestId('z-dialog-overlay')).toBeVisible();
+
+    // Second Escape with no select open closes the dialog
+    await page.keyboard.press('Escape');
+    await expect(page.getByTestId('z-dialog-overlay')).toHaveCount(0);
+
+    // 3. Dashboard searchable month selector
+    await page.goto('/dashboard');
+    await expect(page.getByTestId('dashboard-month-selector')).toBeVisible();
+    await page
+      .getByTestId('dashboard-month-selector')
+      .getByTestId('z-select-trigger')
+      .click();
+    await expect(page.getByTestId('z-select-search')).toBeVisible();
+    await page.getByTestId('z-select-search').fill('marco');
+    await page.getByTestId('z-select-panel').getByRole('option', { name: 'Março 2026' }).click();
+    await expect(page.getByTestId('dashboard-title')).toContainText('Março 2026');
+
+    // 4. Recurrence cards in 3 clean zones + maintenance actions
+    const suffix = Date.now().toString().slice(-5);
+    const richRecName = `Internet Fibra ${suffix}`;
+    const minRecName = `Academia ${suffix}`;
+
+    const r1 = await request.post(`${API_BASE}/recurring-transactions`, {
+      data: {
+        type: 'EXPENSE',
+        description: richRecName,
+        amount: 149.9,
+        amountType: 'FIXED',
+        recurrenceType: 'INDEFINITE',
+        startMonth: '2026-11',
+        dueDay: 15,
+        categoryId: '10000000-0000-0000-0000-000000000002',
+        beneficiaryId: '20000000-0000-0000-0000-000000000001',
+        notes: 'Débito automático mensal',
+      },
+    });
+    expect(r1.ok()).toBe(true);
+
+    const r2 = await request.post(`${API_BASE}/recurring-transactions`, {
+      data: {
+        type: 'EXPENSE',
+        description: minRecName,
+        amount: 99.9,
+        amountType: 'ESTIMATED',
+        recurrenceType: 'FIXED_TERM',
+        startMonth: '2027-01',
+        endMonth: '2027-06',
+      },
+    });
+    expect(r2.ok()).toBe(true);
+
+    await page.goto('/recurrences');
+    const richCard = page.getByTestId(`recurrence-card-${richRecName}`);
+    const minCard = page.getByTestId(`recurrence-card-${minRecName}`);
+    await expect(richCard).toBeVisible();
+    await expect(minCard).toBeVisible();
+
+    await expect(richCard.getByTestId('recurrence-card-header')).toContainText(richRecName);
+    await expect(richCard.getByTestId('recurrence-card-status')).toContainText('Ativa');
+    await expect(richCard.getByTestId('recurrence-card-category')).toContainText('Contas Básicas');
+    await expect(richCard.getByTestId('recurrence-card-beneficiary')).toContainText('Família');
+    await expect(richCard.getByTestId('recurrence-card-notes')).toContainText('Débito automático');
+    expect(await richCard.innerText()).not.toContain('•');
+    expect(await minCard.innerText()).not.toContain('•');
+    await expect(minCard.getByTestId('recurrence-card-category')).toHaveCount(0);
+
+    if (isDesktop) {
+      const boxRich = await richCard.boundingBox();
+      const boxMin = await minCard.boundingBox();
+      expect(Math.abs((boxRich?.height ?? 0) - (boxMin?.height ?? 0))).toBeLessThanOrEqual(2);
+      const footRich = await richCard.getByTestId('recurrence-card-footer').boundingBox();
+      const footMin = await minCard.getByTestId('recurrence-card-footer').boundingBox();
+      expect(Math.abs((footRich?.y ?? 0) - (footMin?.y ?? 0))).toBeLessThanOrEqual(2);
+    }
+
+    // Deactivate & reactivate rich card
+    await richCard.getByTestId('recurrence-deactivate-btn').click();
+    await page.getByTestId('confirm-deactivate-btn').click();
+    await expect(richCard.getByTestId('recurrence-card-status')).toContainText('Inativa');
+    await expect(richCard.getByTestId('recurrence-activate-btn')).toBeVisible();
+
+    await richCard.getByTestId('recurrence-activate-btn').click();
+    await expect(richCard.getByTestId('recurrence-card-status')).toContainText('Ativa');
+
+    // Edit modal has searchable category select
+    await richCard.getByTestId('recurrence-edit-btn').click();
+    await expect(page.getByTestId('z-dialog-overlay')).toBeVisible();
+    await page.locator('#rec-cat').click();
+    await expect(page.getByTestId('z-select-search')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('Escape');
+    await expect(page.getByTestId('z-dialog-overlay')).toHaveCount(0);
+
+    // Delete recurrence that has never generated transactions
+    await minCard.getByTestId('recurrence-delete-btn').click();
+    await page.getByTestId('z-confirm-accept').click();
+    await expect(minCard).toHaveCount(0);
+
+    // 5. Global slim scrollbars in Light Mode, Dark Mode, and dark sidebar
+    const lightScrollbar = await page.evaluate(() => {
+      const rootStyle = window.getComputedStyle(document.documentElement);
+      const asideEl = document.querySelector('aside');
+      const asideStyle = asideEl ? window.getComputedStyle(asideEl) : null;
+      return {
+        rootWidth: rootStyle.scrollbarWidth,
+        rootThumb: rootStyle.getPropertyValue('--lumo-scrollbar-thumb').trim(),
+        asideThumb: asideStyle?.getPropertyValue('--lumo-scrollbar-thumb').trim() ?? '',
+      };
+    });
+    expect(lightScrollbar.rootWidth).toBe('thin');
+    expect(lightScrollbar.rootThumb).not.toBe('');
+    if (isDesktop) {
+      expect(lightScrollbar.asideThumb).not.toBe('');
+      expect(lightScrollbar.asideThumb).not.toBe(lightScrollbar.rootThumb);
+    }
+
+    if (isDesktop) {
+      await page.getByTestId('theme-toggle-desktop').click();
+    } else {
+      await page.getByTestId('mobile-menu-toggle').click();
+      await page.getByTestId('mobile-drawer').getByTestId('theme-toggle-mobile').click();
+      await page.getByLabel('Fechar menu').click();
+    }
+
+    await expect(page.locator('html')).toHaveClass(/dark/);
+    const darkScrollbar = await page.evaluate(() => {
+      const rootStyle = window.getComputedStyle(document.documentElement);
+      return {
+        rootWidth: rootStyle.scrollbarWidth,
+        rootThumb: rootStyle.getPropertyValue('--lumo-scrollbar-thumb').trim(),
+      };
+    });
+    expect(darkScrollbar.rootWidth).toBe('thin');
+    expect(darkScrollbar.rootThumb).not.toBe('');
+    expect(darkScrollbar.rootThumb).not.toBe(lightScrollbar.rootThumb);
+  });
 });

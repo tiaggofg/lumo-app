@@ -93,17 +93,22 @@ import { TransactionFormDrawerComponent } from './transaction-form-drawer.compon
       @if (detail(); as d) {
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch" data-testid="budget-summary-cards">
           <!-- Receitas -->
-          <div class="h-full flex flex-col justify-between rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 space-y-2.5 shadow-sm">
-            <div class="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              <span>RECEITAS</span>
-              <span class="w-8 h-8 rounded-lg bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 inline-flex items-center justify-center">
-                <i class="pi pi-arrow-down-left text-sm" aria-hidden="true"></i>
-              </span>
+          <div class="h-full flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 shadow-sm">
+            <div class="space-y-2.5">
+              <div class="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <span>RECEITAS</span>
+                <span class="w-8 h-8 rounded-lg bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 inline-flex items-center justify-center">
+                  <i class="pi pi-arrow-down-left text-sm" aria-hidden="true"></i>
+                </span>
+              </div>
+              <div class="text-3xl font-extrabold text-sky-600 dark:text-sky-400 tabular-nums" data-testid="summary-planned-income">
+                {{ d.summary.plannedIncome | brlCurrency }}
+              </div>
             </div>
-            <div class="text-3xl font-extrabold text-sky-600 dark:text-sky-400 tabular-nums" data-testid="summary-planned-income">
-              {{ d.summary.plannedIncome | brlCurrency }}
-            </div>
-            <div class="text-sm text-slate-500 dark:text-slate-400 flex justify-between pt-2 border-t border-slate-100 dark:border-slate-800/80">
+            <div
+              class="mt-auto text-sm text-slate-500 dark:text-slate-400 flex items-center justify-between gap-2 pt-3 border-t border-slate-100 dark:border-slate-800/80"
+              data-testid="kpi-footer-income"
+            >
               <span>Realizado (Recebido)</span>
               <span class="font-semibold text-slate-800 dark:text-slate-200 tabular-nums" data-testid="summary-realized-income">
                 {{ d.summary.realizedIncome | brlCurrency }}
@@ -112,51 +117,61 @@ import { TransactionFormDrawerComponent } from './transaction-form-drawer.compon
           </div>
 
           <!-- Despesas -->
-          <div class="h-full flex flex-col justify-between rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 space-y-2.5 shadow-sm">
-            <div class="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              <span>DESPESAS</span>
-              <span class="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 inline-flex items-center justify-center">
-                <i class="pi pi-arrow-up-right text-sm" aria-hidden="true"></i>
-              </span>
+          <div class="h-full flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 shadow-sm">
+            <div class="space-y-2.5">
+              <div class="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <span>DESPESAS</span>
+                <span class="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 inline-flex items-center justify-center">
+                  <i class="pi pi-arrow-up-right text-sm" aria-hidden="true"></i>
+                </span>
+              </div>
+              <div class="text-3xl font-extrabold text-rose-600 dark:text-rose-400 tabular-nums" data-testid="summary-planned-expense">
+                {{ d.summary.plannedExpense | brlCurrency }}
+              </div>
+              <div class="pt-1 flex items-center gap-2.5" data-testid="expense-paid-progress">
+                <div class="h-2 flex-1 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                  <div
+                    class="h-full rounded-full bg-sky-500 transition-all"
+                    [style.width.%]="expensePaidPercent()"
+                  ></div>
+                </div>
+                <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400 tabular-nums shrink-0 whitespace-nowrap">
+                  {{ expensePaidPercent() }}% pago
+                </span>
+              </div>
             </div>
-            <div class="text-3xl font-extrabold text-rose-600 dark:text-rose-400 tabular-nums" data-testid="summary-planned-expense">
-              {{ d.summary.plannedExpense | brlCurrency }}
-            </div>
-            <div class="text-sm text-slate-500 dark:text-slate-400 flex justify-between pt-2 border-t border-slate-100 dark:border-slate-800/80">
+            <div
+              class="mt-auto text-sm text-slate-500 dark:text-slate-400 flex items-center justify-between gap-2 pt-3 border-t border-slate-100 dark:border-slate-800/80"
+              data-testid="kpi-footer-expense"
+            >
               <span>Realizado (Pago)</span>
               <span class="font-semibold text-slate-800 dark:text-slate-200 tabular-nums" data-testid="summary-realized-expense">
                 {{ d.summary.realizedExpense | brlCurrency }}
               </span>
             </div>
-            <div class="pt-1 space-y-1">
-              <div class="h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                <div
-                  class="h-full rounded-full bg-sky-500 transition-all"
-                  [style.width.%]="expensePaidPercent()"
-                ></div>
-              </div>
-              <p class="text-xs font-medium text-slate-500 dark:text-slate-400 tabular-nums text-right">
-                {{ expensePaidPercent() }}% pago
-              </p>
-            </div>
           </div>
 
           <!-- Saldo -->
-          <div class="h-full flex flex-col justify-between rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 space-y-2.5 shadow-sm">
-            <div class="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              <span>SALDO DO MÊS</span>
-              <span class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 inline-flex items-center justify-center">
-                <i class="pi pi-chart-line text-sm" aria-hidden="true"></i>
-              </span>
+          <div class="h-full flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 shadow-sm">
+            <div class="space-y-2.5">
+              <div class="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <span>SALDO DO MÊS</span>
+                <span class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 inline-flex items-center justify-center">
+                  <i class="pi pi-chart-line text-sm" aria-hidden="true"></i>
+                </span>
+              </div>
+              <div
+                class="text-3xl font-extrabold tabular-nums"
+                [class]="d.summary.plannedBalance >= 0 ? 'text-sky-600 dark:text-sky-400' : 'text-rose-600 dark:text-rose-400'"
+                data-testid="summary-planned-balance"
+              >
+                {{ d.summary.plannedBalance | brlCurrency }}
+              </div>
             </div>
             <div
-              class="text-3xl font-extrabold tabular-nums"
-              [class]="d.summary.plannedBalance >= 0 ? 'text-sky-600 dark:text-sky-400' : 'text-rose-600 dark:text-rose-400'"
-              data-testid="summary-planned-balance"
+              class="mt-auto text-sm text-slate-500 dark:text-slate-400 flex items-center justify-between gap-2 pt-3 border-t border-slate-100 dark:border-slate-800/80"
+              data-testid="kpi-footer-balance"
             >
-              {{ d.summary.plannedBalance | brlCurrency }}
-            </div>
-            <div class="text-sm text-slate-500 dark:text-slate-400 flex justify-between pt-2 border-t border-slate-100 dark:border-slate-800/80">
               <span>Saldo Realizado</span>
               <span class="font-semibold text-slate-800 dark:text-slate-200 tabular-nums" data-testid="summary-realized-balance">
                 {{ d.summary.realizedBalance | brlCurrency }}
@@ -196,6 +211,7 @@ import { TransactionFormDrawerComponent } from './transaction-form-drawer.compon
           />
 
           <z-select
+            inputId="filter-status"
             [ngModel]="store.filters().status"
             (ngModelChange)="onFilterChange({ status: $event })"
             [options]="statusFilterOptions"
@@ -207,6 +223,7 @@ import { TransactionFormDrawerComponent } from './transaction-form-drawer.compon
           />
 
           <z-select
+            inputId="filter-category"
             [ngModel]="store.filters().categoryId"
             (ngModelChange)="onFilterChange({ categoryId: $event })"
             [options]="catalogStore.categories()"
@@ -214,10 +231,13 @@ import { TransactionFormDrawerComponent } from './transaction-form-drawer.compon
             optionValue="id"
             placeholder="Categoria"
             [showClear]="true"
+            [searchable]="true"
+            searchPlaceholder="Buscar categoria..."
             styleClass="w-full"
           />
 
           <z-select
+            inputId="filter-beneficiary"
             [ngModel]="store.filters().beneficiaryId"
             (ngModelChange)="onFilterChange({ beneficiaryId: $event })"
             [options]="catalogStore.beneficiaries()"
@@ -225,6 +245,8 @@ import { TransactionFormDrawerComponent } from './transaction-form-drawer.compon
             optionValue="id"
             placeholder="Beneficiário"
             [showClear]="true"
+            [searchable]="true"
+            searchPlaceholder="Buscar beneficiário..."
             styleClass="w-full"
           />
 

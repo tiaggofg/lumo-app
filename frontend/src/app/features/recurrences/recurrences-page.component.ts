@@ -7,6 +7,7 @@ import {
   TransactionType,
 } from '../../core/models/api.models';
 import { BrlCurrencyPipe } from '../../shared/pipes/brl-currency.pipe';
+import { CompetenceMonthPipe } from '../../shared/pipes/competence-month.pipe';
 import {
   ZButtonComponent,
   ZCheckboxComponent,
@@ -17,6 +18,7 @@ import {
   ZSelectComponent,
   ZTextareaDirective,
   ZToastService,
+  ZTooltipDirective,
 } from '../../shared/ui';
 import { CatalogStoreService } from '../catalog/catalog-store.service';
 import { RecurrencesStoreService } from './recurrences-store.service';
@@ -33,7 +35,9 @@ import { RecurrencesStoreService } from './recurrences-store.service';
     ZInputDirective,
     ZSelectComponent,
     ZTextareaDirective,
+    ZTooltipDirective,
     BrlCurrencyPipe,
+    CompetenceMonthPipe,
   ],
   template: `
     <div class="space-y-6">
@@ -98,100 +102,218 @@ import { RecurrencesStoreService } from './recurrences-store.service';
           <z-button label="Criar primeira recorrência" icon="pi pi-plus" (buttonClick)="openFormDialog()" />
         </div>
       } @else {
-        <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-5">
+        <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-5 items-stretch" data-testid="recurrences-grid">
           @for (rule of store.recurrences(); track rule.id) {
-            <div
+            <article
               [attr.data-testid]="'recurrence-card-' + rule.description"
-              class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 space-y-4 shadow-sm"
-              [class.opacity-60]="!rule.active"
+              [attr.data-active]="rule.active"
+              class="h-full flex flex-col gap-4 rounded-2xl border p-5 shadow-sm transition-colors"
+              [class]="
+                rule.active
+                  ? 'bg-white dark:bg-slate-900 border-slate-200/90 dark:border-slate-800'
+                  : 'bg-slate-50/90 dark:bg-slate-900/60 border-dashed border-slate-300 dark:border-slate-700'
+              "
             >
-              <div class="flex items-start justify-between gap-3">
-                <div class="space-y-1.5 min-w-0">
-                  <div class="flex flex-wrap items-center gap-2">
-                    <h2 class="font-bold text-lg truncate">{{ rule.description }}</h2>
+              <!-- Zone 1: Header (Title + Active Status | Amount + Amount Type) -->
+              <div class="flex items-start justify-between gap-4" data-testid="recurrence-card-header">
+                <div class="min-w-0 space-y-1">
+                  <h2
+                    class="font-bold text-[17px] leading-snug truncate"
+                    [class]="
+                      rule.active
+                        ? 'text-slate-900 dark:text-slate-100'
+                        : 'text-slate-600 dark:text-slate-300'
+                    "
+                    [title]="rule.description"
+                  >
+                    {{ rule.description }}
+                  </h2>
+                  <div
+                    class="inline-flex items-center gap-1.5 text-xs font-semibold"
+                    [class]="
+                      rule.active
+                        ? 'text-sky-600 dark:text-sky-400'
+                        : 'text-slate-500 dark:text-slate-400'
+                    "
+                    data-testid="recurrence-card-status"
+                  >
                     <span
-                      class="px-2.5 py-0.5 rounded-full text-xs font-semibold"
-                      [class]="
-                        rule.type === 'INCOME'
-                          ? 'bg-sky-100 text-sky-800 dark:bg-sky-900/45 dark:text-sky-300'
-                          : 'bg-rose-100 text-rose-800 dark:bg-rose-900/45 dark:text-rose-300'
-                      "
-                    >
-                      {{ rule.type === 'INCOME' ? 'Receita' : 'Despesa' }}
-                    </span>
-                    <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800 dark:bg-indigo-900/45 dark:text-indigo-300">
-                      {{ modeLabel(rule) }}
-                    </span>
-                    <span
-                      class="px-2.5 py-0.5 rounded-full text-xs font-semibold"
-                      [class]="
-                        rule.amountType === 'ESTIMATED'
-                          ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/45 dark:text-amber-300'
-                          : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
-                      "
-                    >
-                      {{ rule.amountType === 'ESTIMATED' ? 'Estimado' : 'Fixo' }}
-                    </span>
+                      class="w-1.5 h-1.5 rounded-full shrink-0"
+                      [class]="rule.active ? 'bg-sky-500' : 'bg-slate-400 dark:bg-slate-500'"
+                    ></span>
+                    <span>{{ rule.active ? 'Ativa' : 'Inativa' }}</span>
                   </div>
-                  <p class="text-sm text-slate-500 dark:text-slate-400">
-                    Início: {{ rule.startMonth }}
-                    @if (rule.dueDay) {
-                      • Vencimento dia {{ rule.dueDay }}
-                    }
-                    @if (rule.categoryName) {
-                      • {{ rule.categoryName }}
-                    }
-                    @if (rule.beneficiaryName) {
-                      • {{ rule.beneficiaryName }}
-                    }
-                  </p>
                 </div>
 
                 <div class="text-right shrink-0">
-                  <div class="font-extrabold text-xl tabular-nums">{{ rule.amount | brlCurrency }}</div>
-                  <span
-                    class="text-xs font-semibold"
-                    [class]="rule.active ? 'text-sky-600 dark:text-sky-400' : 'text-slate-400'"
+                  <div
+                    class="font-extrabold text-xl leading-snug tabular-nums"
+                    [class]="
+                      !rule.active
+                        ? 'text-slate-600 dark:text-slate-300'
+                        : rule.type === 'INCOME'
+                          ? 'text-sky-600 dark:text-sky-400'
+                          : 'text-slate-900 dark:text-slate-100'
+                    "
                   >
-                    {{ rule.active ? 'Ativa' : 'Inativa' }}
+                    {{ rule.type === 'INCOME' ? '+ ' : '' }}{{ rule.amount | brlCurrency }}
+                  </div>
+                  <span
+                    class="inline-block text-xs font-semibold mt-0.5"
+                    [class]="
+                      rule.amountType === 'ESTIMATED'
+                        ? 'text-amber-600 dark:text-amber-400'
+                        : 'text-slate-500 dark:text-slate-400'
+                    "
+                    data-testid="recurrence-card-amount-type"
+                  >
+                    {{ rule.amountType === 'ESTIMATED' ? 'Estimado' : 'Fixo' }}
                   </span>
                 </div>
               </div>
 
-              <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-                <z-button
-                  label="Editar"
-                  icon="pi pi-pencil"
-                  size="sm"
-                  variant="ghost"
-                  (buttonClick)="openFormDialog(rule)"
-                />
-                @if (rule.active) {
-                  <z-button
-                    label="Desativar"
-                    icon="pi pi-pause"
-                    size="sm"
-                    variant="warn"
-                    (buttonClick)="openDeactivateDialog(rule)"
-                  />
-                } @else {
-                  <z-button
-                    label="Reativar"
-                    icon="pi pi-play"
-                    size="sm"
-                    variant="success"
-                    (buttonClick)="activate(rule)"
-                  />
+              <!-- Zone 2: Body (Structured Metadata & Optional Notes) -->
+              <div class="space-y-2.5 text-xs" data-testid="recurrence-card-body">
+                <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                  <span
+                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50/80 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 font-semibold"
+                    data-testid="recurrence-card-mode"
+                  >
+                    <i class="pi pi-sync text-[11px]" aria-hidden="true"></i>
+                    <span>{{ modeLabel(rule) }}</span>
+                  </span>
+
+                  <span
+                    class="inline-flex items-center gap-1.5 text-slate-600 dark:text-slate-300 font-medium"
+                    data-testid="recurrence-card-start"
+                  >
+                    <i class="pi pi-calendar text-[11px] text-slate-400" aria-hidden="true"></i>
+                    <span>Início {{ rule.startMonth | competenceMonth }}</span>
+                  </span>
+
+                  @if (rule.dueDay) {
+                    <span
+                      class="inline-flex items-center gap-1.5 text-slate-600 dark:text-slate-300 font-medium tabular-nums"
+                      data-testid="recurrence-card-due-day"
+                    >
+                      <i class="pi pi-clock text-[11px] text-slate-400" aria-hidden="true"></i>
+                      <span>Dia {{ rule.dueDay }}</span>
+                    </span>
+                  }
+                </div>
+
+                @if (rule.categoryName || rule.beneficiaryName) {
+                  <div class="flex flex-wrap items-center gap-2">
+                    @if (rule.categoryName) {
+                      <span
+                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 font-medium max-w-full"
+                        data-testid="recurrence-card-category"
+                      >
+                        <span
+                          class="w-2.5 h-2.5 rounded-full shrink-0"
+                          [style.background-color]="rule.categoryColor || '#4F46E5'"
+                          data-testid="recurrence-card-category-dot"
+                        ></span>
+                        <span class="truncate">{{ rule.categoryName }}</span>
+                      </span>
+                    }
+
+                    @if (rule.beneficiaryName) {
+                      <span
+                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100/70 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 font-medium max-w-full"
+                        data-testid="recurrence-card-beneficiary"
+                      >
+                        <i class="pi pi-user text-[11px] text-slate-400 shrink-0" aria-hidden="true"></i>
+                        <span class="truncate">{{ rule.beneficiaryName }}</span>
+                      </span>
+                    }
+                  </div>
                 }
-                <z-button
-                  label="Excluir"
-                  icon="pi pi-trash"
-                  size="sm"
-                  variant="destructive"
-                  (buttonClick)="confirmDelete(rule)"
-                />
+
+                @if (rule.notes) {
+                  <p
+                    class="text-xs text-slate-500 dark:text-slate-400 truncate"
+                    [title]="rule.notes"
+                    data-testid="recurrence-card-notes"
+                  >
+                    {{ rule.notes }}
+                  </p>
+                }
               </div>
-            </div>
+
+              <!-- Zone 3: Footer (Type Badge | Compact Maintenance Actions) -->
+              <div
+                class="mt-auto pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2"
+                data-testid="recurrence-card-footer"
+              >
+                <span
+                  class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold"
+                  [class]="
+                    rule.type === 'INCOME'
+                      ? 'bg-sky-50 text-sky-700 dark:bg-sky-950/60 dark:text-sky-300'
+                      : 'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300'
+                  "
+                  data-testid="recurrence-card-type"
+                >
+                  <i
+                    [class]="
+                      rule.type === 'INCOME'
+                        ? 'pi pi-arrow-down-left text-[10px]'
+                        : 'pi pi-arrow-up-right text-[10px]'
+                    "
+                    aria-hidden="true"
+                  ></i>
+                  <span>{{ rule.type === 'INCOME' ? 'Receita' : 'Despesa' }}</span>
+                </span>
+
+                <div class="flex items-center gap-1.5">
+                  <z-button
+                    label="Editar"
+                    icon="pi pi-pencil"
+                    size="sm"
+                    variant="outline"
+                    data-testid="recurrence-edit-btn"
+                    (buttonClick)="openFormDialog(rule)"
+                  />
+                  @if (rule.active) {
+                    <button
+                      type="button"
+                      (click)="openDeactivateDialog(rule)"
+                      zTooltip="Desativar"
+                      tooltipPosition="top"
+                      aria-label="Desativar recorrência"
+                      data-testid="recurrence-deactivate-btn"
+                      class="w-8 h-8 rounded-lg inline-flex items-center justify-center text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/50 transition-colors cursor-pointer"
+                    >
+                      <i class="pi pi-pause text-xs" aria-hidden="true"></i>
+                    </button>
+                  } @else {
+                    <button
+                      type="button"
+                      (click)="activate(rule)"
+                      zTooltip="Reativar"
+                      tooltipPosition="top"
+                      aria-label="Reativar recorrência"
+                      data-testid="recurrence-activate-btn"
+                      class="w-8 h-8 rounded-lg inline-flex items-center justify-center text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-sky-950/50 transition-colors cursor-pointer"
+                    >
+                      <i class="pi pi-play text-xs" aria-hidden="true"></i>
+                    </button>
+                  }
+                  <button
+                    type="button"
+                    (click)="confirmDelete(rule)"
+                    zTooltip="Excluir"
+                    tooltipPosition="top"
+                    aria-label="Excluir recorrência"
+                    data-testid="recurrence-delete-btn"
+                    class="w-8 h-8 rounded-lg inline-flex items-center justify-center text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
+                  >
+                    <i class="pi pi-trash text-xs" aria-hidden="true"></i>
+                  </button>
+                </div>
+              </div>
+            </article>
           }
         </div>
       }
@@ -342,6 +464,8 @@ import { RecurrencesStoreService } from './recurrences-store.service';
               optionValue="id"
               placeholder="Selecione"
               [showClear]="true"
+              [searchable]="true"
+              searchPlaceholder="Buscar categoria..."
               styleClass="w-full"
             />
           </div>
@@ -355,6 +479,8 @@ import { RecurrencesStoreService } from './recurrences-store.service';
               optionValue="id"
               placeholder="Selecione"
               [showClear]="true"
+              [searchable]="true"
+              searchPlaceholder="Buscar beneficiário..."
               styleClass="w-full"
             />
           </div>

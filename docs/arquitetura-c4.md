@@ -42,12 +42,12 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-  Shell["AppShellComponent (h-dvh Sticky Dark Sidebar + Collapsible w-20 Rail + Compact Footer + UserProfilePopoverComponent + <app-lumo-logo>)"] --> Dash["/dashboard — DashboardPageComponent (KPIs + 4 <z-chart-container> shadcn Charts)"]
+  Shell["AppShellComponent (h-dvh Sticky Dark Sidebar + Collapsible w-20 Rail + Compact Footer + UserProfilePopoverComponent + <app-lumo-logo>)"] --> Dash["/dashboard — DashboardPageComponent (KPIs + Seletor de Mês com busca + 4 <z-chart-container> shadcn Charts)"]
   Shell --> Budgets["/budgets — BudgetListPageComponent"]
-  Shell --> Detail["/budgets/:id — BudgetDetailPageComponent (Tabela + [zTooltip] Status 1-clique)"]
-  Shell --> Rec["/recurrences — RecurrencesPageComponent"]
+  Shell --> Detail["/budgets/:id — BudgetDetailPageComponent (3 KPIs alinhados na base + Filtros com busca + Tabela com [zTooltip] Status 1-clique)"]
+  Shell --> Rec["/recurrences — RecurrencesPageComponent (Cards em 3 zonas + Ações compactas com [zTooltip])"]
   Shell --> Cat["/catalog — CatalogPageComponent"]
-  Shell --> ZUI["shared/ui/ — ZardUI Primitives (z-button, z-dialog, z-confirm-dialog, z-toast-viewport, z-select, z-input-number)"]
+  Shell --> ZUI["shared/ui/ — ZardUI Primitives (z-button, z-dialog, z-confirm-dialog, z-toast-viewport, z-select viewport-fixed/searchable, z-input-number) + Scrollbars finas globais"]
   Dash --> Store["BudgetsStoreService (Signals)"]
   Budgets --> Store
   Detail --> Store

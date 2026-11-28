@@ -1,9 +1,11 @@
 import { NgTemplateOutlet } from '@angular/common';
 import {
   Component,
+  ElementRef,
   HostListener,
   TemplateRef,
   contentChild,
+  inject,
   input,
   model,
 } from '@angular/core';
@@ -47,7 +49,7 @@ import {
             </button>
           </div>
 
-          <div class="px-6 py-4 overflow-y-auto flex-1">
+          <div class="px-6 py-4 overflow-y-auto flex-1" data-testid="z-dialog-body">
             <ng-content />
           </div>
 
@@ -64,16 +66,22 @@ import {
   `,
 })
 export class ZDialogComponent {
+  private readonly hostRef = inject<ElementRef<HTMLElement>>(ElementRef);
+
   readonly header = input<string>('');
   readonly visible = model<boolean>(false);
   readonly widthClass = input<string>('max-w-lg');
   readonly footerTemplate = contentChild<TemplateRef<unknown>>('footer');
 
-  @HostListener('document:keydown.escape')
-  onEscapeKey(): void {
-    if (this.visible()) {
-      this.close();
+  @HostListener('document:keydown.escape', ['$event'])
+  onEscapeKey(event: Event): void {
+    if (!this.visible() || event.defaultPrevented) {
+      return;
     }
+    if (this.hostRef.nativeElement.querySelector('[data-testid="z-select-panel"]')) {
+      return;
+    }
+    this.close();
   }
 
   close(): void {

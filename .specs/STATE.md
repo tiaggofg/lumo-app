@@ -100,10 +100,10 @@
 
 ## Handoff
 
-- **Feature**: `05-sidebar-profile-footer`
-- **Phase / Task**: Completed (`T1..T4` implementadas, verificadas e aprovadas)
-- **Completed**: `01-lumo-mvp`, `02-ui-ux-overhaul`, `03-zardui-brand-and-shell`, `04-google-oauth-auth`, `05-sidebar-profile-footer`
+- **Feature**: `06-ui-polish-selects-kpis-recurrences`
+- **Phase / Task**: Completed (`T1..T8` concluídas, verificadas e aprovadas pelo usuário em 2026-11-28)
+- **Completed**: `01-lumo-mvp`, `02-ui-ux-overhaul`, `03-zardui-brand-and-shell`, `04-google-oauth-auth`, `05-sidebar-profile-footer`, `06-ui-polish-selects-kpis-recurrences`
 - **In-progress** (file:line): none
-- **Next step**: Pronto para próxima feature
+- **Next step**: Pronto para a próxima feature
 - **Blockers**: none
 - **Branch**: main
