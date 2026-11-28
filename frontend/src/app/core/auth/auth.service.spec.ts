@@ -2,6 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
+import { API_BASE_URL } from '../interceptors/api-url.interceptor';
 import { AuthService, sanitizeReturnUrl } from './auth.service';
 import { AuthUser } from './auth.models';
 
@@ -91,6 +92,23 @@ describe('AuthService & sanitizeReturnUrl', () => {
     expect(sanitizeReturnUrl('/login?error=oauth_failed')).toBe('/dashboard');
     expect(service.buildGoogleLoginUrl('/catalog')).toBe(
       '/api/v1/auth/google/login?returnUrl=%2Fcatalog'
+    );
+  });
+
+  it('should prefix Google login URL with API_BASE_URL when configured', () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([]),
+        { provide: API_BASE_URL, useValue: 'https://api.lumo.example.com/' },
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+    });
+    const crossOriginAuth = TestBed.inject(AuthService);
+
+    expect(crossOriginAuth.buildGoogleLoginUrl('/catalog')).toBe(
+      'https://api.lumo.example.com/api/v1/auth/google/login?returnUrl=%2Fcatalog'
     );
   });
 });

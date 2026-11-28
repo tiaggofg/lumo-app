@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, finalize, firstValueFrom, shareReplay, tap } from 'rxjs';
+import { API_BASE_URL, normalizeApiBaseUrl } from '../interceptors/api-url.interceptor';
 import { AuthProviders, AuthStatus, AuthUser } from './auth.models';
 
 export function sanitizeReturnUrl(rawUrl: string | null | undefined): string {
@@ -25,6 +26,7 @@ export function sanitizeReturnUrl(rawUrl: string | null | undefined): string {
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
+  private readonly apiBaseUrl = inject(API_BASE_URL);
 
   readonly user = signal<AuthUser | null>(null);
   readonly status = signal<AuthStatus>('loading');
@@ -75,7 +77,8 @@ export class AuthService {
 
   buildGoogleLoginUrl(returnUrl?: string | null): string {
     const safeReturnUrl = sanitizeReturnUrl(returnUrl);
-    return `/api/v1/auth/google/login?returnUrl=${encodeURIComponent(safeReturnUrl)}`;
+    const baseUrl = normalizeApiBaseUrl(this.apiBaseUrl);
+    return `${baseUrl}/api/v1/auth/google/login?returnUrl=${encodeURIComponent(safeReturnUrl)}`;
   }
 
   startGoogleLogin(returnUrl?: string | null): void {

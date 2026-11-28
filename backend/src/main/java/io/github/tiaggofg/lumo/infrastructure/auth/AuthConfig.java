@@ -23,6 +23,11 @@ public interface AuthConfig {
     @WithDefault("true")
     boolean cookieSecure();
 
+    @WithDefault("LAX")
+    String cookieSameSite();
+
+    Optional<String> frontendUrl();
+
     Optional<String> allowedEmails();
 
     DevLoginConfig devLogin();

@@ -4,6 +4,7 @@ import jakarta.ws.rs.core.NewCookie;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -16,24 +17,116 @@ class AuthStartupValidatorTest {
 
     @Test
     void shouldFailInProdWhenSecretIsMissingOrShort() {
-        AuthConfig blankConfig = mock(AuthConfig.class);
-        when(blankConfig.jwtSecret()).thenReturn(Optional.of(""));
+        AuthConfig blankConfig = baseValidConfig("");
         AuthStartupValidator blankValidator = new AuthStartupValidator(blankConfig);
         assertThatThrownBy(() -> blankValidator.validate(true))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("LUMO_AUTH_JWT_SECRET");
 
-        AuthConfig shortConfig = mock(AuthConfig.class);
-        when(shortConfig.jwtSecret()).thenReturn(Optional.of("too-short-secret"));
+        AuthConfig shortConfig = baseValidConfig("too-short-secret");
         AuthStartupValidator shortValidator = new AuthStartupValidator(shortConfig);
         assertThatThrownBy(() -> shortValidator.validate(true))
                 .isInstanceOf(IllegalStateException.class);
         assertThatCode(() -> shortValidator.validate(false)).doesNotThrowAnyException();
 
-        AuthConfig validConfig = mock(AuthConfig.class);
-        when(validConfig.jwtSecret()).thenReturn(Optional.of("a-very-strong-production-secret-32-chars-minimum"));
+        AuthConfig validConfig = baseValidConfig("a-very-strong-production-secret-32-chars-minimum");
         AuthStartupValidator validValidator = new AuthStartupValidator(validConfig);
         assertThatCode(() -> validValidator.validate(true)).doesNotThrowAnyException();
+    }
+
+    @Test
+    void shouldFailWhenCookieSameSiteIsUnsupported() {
+        AuthConfig invalidConfig = baseValidConfig("a-very-strong-production-secret-32-chars-minimum");
+        when(invalidConfig.cookieSameSite()).thenReturn("INVALID");
+        AuthStartupValidator validator = new AuthStartupValidator(invalidConfig);
+
+        assertThatThrownBy(() -> validator.validate(false))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("LUMO_AUTH_COOKIE_SAME_SITE");
+    }
+
+    @Test
+    void shouldFailWhenCookieSameSiteIsNoneWithoutSecureCookie() {
+        AuthConfig upperNone = baseValidConfig("a-very-strong-production-secret-32-chars-minimum");
+        when(upperNone.cookieSameSite()).thenReturn("NONE");
+        when(upperNone.cookieSecure()).thenReturn(false);
+
+        assertThatThrownBy(() -> new AuthStartupValidator(upperNone).validate(false))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("cookie-secure=true");
+
+        AuthConfig lowerNone = baseValidConfig("a-very-strong-production-secret-32-chars-minimum");
+        when(lowerNone.cookieSameSite()).thenReturn("none");
+        when(lowerNone.cookieSecure()).thenReturn(false);
+
+        assertThatThrownBy(() -> new AuthStartupValidator(lowerNone).validate(true))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("cookie-secure=true");
+    }
+
+    @Test
+    void shouldAcceptValidCookieSameSitePoliciesCaseInsensitively() {
+        AuthConfig noneSecure = baseValidConfig("a-very-strong-production-secret-32-chars-minimum");
+        when(noneSecure.cookieSameSite()).thenReturn("none");
+        when(noneSecure.cookieSecure()).thenReturn(true);
+        assertThatCode(() -> new AuthStartupValidator(noneSecure).validate(true)).doesNotThrowAnyException();
+
+        AuthConfig laxInsecure = baseValidConfig("a-very-strong-production-secret-32-chars-minimum");
+        when(laxInsecure.cookieSameSite()).thenReturn("Lax");
+        when(laxInsecure.cookieSecure()).thenReturn(false);
+        assertThatCode(() -> new AuthStartupValidator(laxInsecure).validate(false)).doesNotThrowAnyException();
+
+        AuthConfig strictConfig = baseValidConfig("a-very-strong-production-secret-32-chars-minimum");
+        when(strictConfig.cookieSameSite()).thenReturn("strict");
+        when(strictConfig.cookieSecure()).thenReturn(true);
+        assertThatCode(() -> new AuthStartupValidator(strictConfig).validate(true)).doesNotThrowAnyException();
+    }
+
+    @Test
+    void shouldFailWhenFrontendUrlHasInvalidSchemeOrMissingHost() {
+        for (String invalidUrl : new String[]{
+                "lumo.example.com",
+                "javascript:alert(1)",
+                "ftp://lumo.example.com",
+                "https://",
+                "http://bad host"
+        }) {
+            AuthConfig config = baseValidConfig("a-very-strong-production-secret-32-chars-minimum");
+            when(config.frontendUrl()).thenReturn(Optional.of(invalidUrl));
+            AuthStartupValidator validator = new AuthStartupValidator(config);
+
+            assertThatThrownBy(() -> validator.validate(false))
+                    .as("Expected failure for frontendUrl=%s", invalidUrl)
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("LUMO_FRONTEND_URL");
+        }
+    }
+
+    @Test
+    void shouldAcceptBlankOrValidHttpAndHttpsFrontendUrls() {
+        List<Optional<String>> validUrls = List.of(
+                Optional.empty(),
+                Optional.of(""),
+                Optional.of("   "),
+                Optional.of("http://localhost:4200"),
+                Optional.of("https://lumo.example.com"),
+                Optional.of("https://lumo.example.com/")
+        );
+        for (Optional<String> validUrl : validUrls) {
+            AuthConfig config = baseValidConfig("a-very-strong-production-secret-32-chars-minimum");
+            when(config.frontendUrl()).thenReturn(validUrl);
+            assertThatCode(() -> new AuthStartupValidator(config).validate(true))
+                    .doesNotThrowAnyException();
+        }
+    }
+
+    private AuthConfig baseValidConfig(String jwtSecret) {
+        AuthConfig config = mock(AuthConfig.class);
+        when(config.jwtSecret()).thenReturn(Optional.of(jwtSecret));
+        when(config.cookieSameSite()).thenReturn("LAX");
+        when(config.cookieSecure()).thenReturn(true);
+        when(config.frontendUrl()).thenReturn(Optional.empty());
+        return config;
     }
 
     @Test

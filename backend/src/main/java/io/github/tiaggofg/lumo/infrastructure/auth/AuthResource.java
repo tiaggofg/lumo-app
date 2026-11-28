@@ -153,7 +153,7 @@ public class AuthResource {
             );
             LOG.infof("Google OAuth login succeeded for userId=%s", session.user().id());
             return Response.status(Response.Status.FOUND)
-                    .header("Location", payload.returnUrl())
+                    .header("Location", resolveFrontendRedirect(payload.returnUrl()))
                     .cookie(
                             cookieHelper.accessCookie(session.accessToken()),
                             cookieHelper.refreshCookie(session.refreshToken()),
@@ -238,11 +238,28 @@ public class AuthResource {
 
     private Response redirectToLoginError(String errorCode, boolean clearStateCookie) {
         Response.ResponseBuilder builder = Response.status(Response.Status.FOUND)
-                .header("Location", "/login?error=" + urlEncode(errorCode));
+                .header("Location", resolveFrontendRedirect("/login?error=" + urlEncode(errorCode)));
         if (clearStateCookie) {
             builder.cookie(cookieHelper.clearOAuthStateCookie());
         }
         return builder.build();
+    }
+
+    private String resolveFrontendRedirect(String relativePath) {
+        String normalizedBase = stripTrailingSlashes(authConfig.frontendUrl().map(String::trim).orElse(""));
+        if (normalizedBase.isEmpty()) {
+            return relativePath;
+        }
+        boolean hasLeadingSlash = !relativePath.isEmpty() && relativePath.charAt(0) == '/';
+        return hasLeadingSlash ? normalizedBase + relativePath : normalizedBase + '/' + relativePath;
+    }
+
+    private static String stripTrailingSlashes(String url) {
+        int end = url.length();
+        while (end > 0 && url.charAt(end - 1) == '/') {
+            end--;
+        }
+        return url.substring(0, end);
     }
 
     private String urlEncode(String value) {

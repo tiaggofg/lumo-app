@@ -3,6 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { ZToastService } from '../../shared/ui/toast/z-toast.service';
+import { API_BASE_URL, apiUrlInterceptor } from '../interceptors/api-url.interceptor';
 import { problemDetailInterceptor } from '../interceptors/problem-detail.interceptor';
 import { authInterceptor } from './auth.interceptor';
 import { AuthService } from './auth.service';
@@ -80,5 +81,42 @@ describe('authInterceptor', () => {
     expect(failed).toBe(true);
     expect(authService.status()).toBe('unauthenticated');
     expect(navSpy).toHaveBeenCalledWith(['/login'], { queryParams: undefined });
+  });
+
+  it('should prefix api requests with API_BASE_URL and preserve single retry on 401 refresh', () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([]),
+        { provide: API_BASE_URL, useValue: 'https://api.lumo.example.com' },
+        provideHttpClient(
+          withInterceptors([problemDetailInterceptor, authInterceptor, apiUrlInterceptor])
+        ),
+        provideHttpClientTesting(),
+      ],
+    });
+
+    const crossOriginHttp = TestBed.inject(HttpClient);
+    const crossOriginHttpMock = TestBed.inject(HttpTestingController);
+    let budgetsResult: unknown;
+
+    crossOriginHttp.get('/api/v1/budgets').subscribe((res) => (budgetsResult = res));
+
+    const firstReq = crossOriginHttpMock.expectOne('https://api.lumo.example.com/api/v1/budgets');
+    expect(firstReq.request.withCredentials).toBe(true);
+    firstReq.flush({ status: 401 }, { status: 401, statusText: 'Unauthorized' });
+
+    const refreshReq = crossOriginHttpMock.expectOne(
+      'https://api.lumo.example.com/api/v1/auth/refresh'
+    );
+    expect(refreshReq.request.withCredentials).toBe(true);
+    refreshReq.flush({ id: 'u1', email: 'dev@lumo.local', name: 'Dev', avatarUrl: null });
+
+    const retryReq = crossOriginHttpMock.expectOne('https://api.lumo.example.com/api/v1/budgets');
+    expect(retryReq.request.withCredentials).toBe(true);
+    retryReq.flush([{ id: 'b1' }]);
+
+    expect(budgetsResult).toEqual([{ id: 'b1' }]);
+    crossOriginHttpMock.verify();
   });
 });

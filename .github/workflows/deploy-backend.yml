@@ -1,0 +1,130 @@
+name: Deploy Backend (GHCR + Portainer CE)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "backend/**"
+      - "docker-compose.prod.*.yml"
+      - ".github/workflows/deploy-backend.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: deploy-backend-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 25 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+
+      - name: Run backend verification suite
+        working-directory: backend
+        run: ./mvnw verify --batch-mode
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push multi-arch backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/lumo-backend:latest
+            ghcr.io/${{ github.repository_owner }}/lumo-backend:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Trigger Portainer CE Git stack redeploy
+        env:
+          PORTAINER_URL: ${{ secrets.PORTAINER_URL }}
+          PORTAINER_API_KEY: ${{ secrets.PORTAINER_API_KEY }}
+          PORTAINER_STACK_ID: ${{ secrets.PORTAINER_STACK_ID }}
+          PORTAINER_ENDPOINT_ID: ${{ secrets.PORTAINER_ENDPOINT_ID }}
+          PORTAINER_GIT_USERNAME: ${{ secrets.PORTAINER_GIT_USERNAME }}
+          PORTAINER_GIT_PASSWORD: ${{ secrets.PORTAINER_GIT_PASSWORD }}
+        run: |
+          set -euo pipefail
+
+          missing=()
+          [ -z "${PORTAINER_URL:-}" ] && missing+=("PORTAINER_URL")
+          [ -z "${PORTAINER_API_KEY:-}" ] && missing+=("PORTAINER_API_KEY")
+          [ -z "${PORTAINER_STACK_ID:-}" ] && missing+=("PORTAINER_STACK_ID")
+          [ -z "${PORTAINER_ENDPOINT_ID:-}" ] && missing+=("PORTAINER_ENDPOINT_ID")
+
+          if [ "${#missing[@]}" -gt 0 ]; then
+            echo "::error::Missing required Portainer secrets: ${missing[*]}"
+            exit 1
+          fi
+
+          BASE_URL="${PORTAINER_URL%/}"
+
+          STACK_JSON=$(curl -fsS \
+            -H "X-API-Key: ${PORTAINER_API_KEY}" \
+            "${BASE_URL}/api/stacks/${PORTAINER_STACK_ID}")
+
+          STACK_ENV=$(echo "${STACK_JSON}" | jq -c '.Env // []')
+
+          if [ -n "${PORTAINER_GIT_USERNAME:-}" ] && [ -n "${PORTAINER_GIT_PASSWORD:-}" ]; then
+            PAYLOAD=$(jq -n \
+              --argjson env "${STACK_ENV}" \
+              --arg username "${PORTAINER_GIT_USERNAME}" \
+              --arg password "${PORTAINER_GIT_PASSWORD}" \
+              '{
+                env: $env,
+                prune: true,
+                pullImage: true,
+                repositoryReferenceName: "refs/heads/main",
+                repositoryAuthentication: true,
+                repositoryUsername: $username,
+                repositoryPassword: $password
+              }')
+          else
+            PAYLOAD=$(jq -n \
+              --argjson env "${STACK_ENV}" \
+              '{
+                env: $env,
+                prune: true,
+                pullImage: true,
+                repositoryReferenceName: "refs/heads/main",
+                repositoryAuthentication: false
+              }')
+          fi
+
+          curl -fsS -X PUT \
+            -H "X-API-Key: ${PORTAINER_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "${PAYLOAD}" \
+            "${BASE_URL}/api/stacks/${PORTAINER_STACK_ID}/git/redeploy?endpointId=${PORTAINER_ENDPOINT_ID}" \
+            > /dev/null
+
+          echo "Portainer stack ${PORTAINER_STACK_ID} redeploy triggered successfully."

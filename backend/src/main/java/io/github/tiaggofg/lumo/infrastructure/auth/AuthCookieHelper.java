@@ -4,6 +4,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.NewCookie;
 
+import java.util.Locale;
+
 @ApplicationScoped
 public class AuthCookieHelper {
 
@@ -67,7 +69,22 @@ public class AuthCookieHelper {
                 .maxAge(maxAgeSeconds)
                 .httpOnly(true)
                 .secure(authConfig.cookieSecure())
-                .sameSite(NewCookie.SameSite.LAX)
+                .sameSite(resolveSameSite())
                 .build();
+    }
+
+    NewCookie.SameSite resolveSameSite() {
+        String raw = authConfig.cookieSameSite();
+        if (raw == null || raw.isBlank()) {
+            return NewCookie.SameSite.LAX;
+        }
+        return switch (raw.trim().toUpperCase(Locale.ROOT)) {
+            case "NONE" -> NewCookie.SameSite.NONE;
+            case "STRICT" -> NewCookie.SameSite.STRICT;
+            case "LAX" -> NewCookie.SameSite.LAX;
+            default -> throw new IllegalStateException(
+                    "Unsupported LUMO_AUTH_COOKIE_SAME_SITE value: " + raw
+            );
+        };
     }
 }

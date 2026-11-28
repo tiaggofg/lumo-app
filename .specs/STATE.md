@@ -98,12 +98,20 @@
 - **Date**: 2026-11-27
 - **Status**: active (AD-012)
 
+### AD-013
+- **Decision**: Adotar deploy de produção desacoplado com frontend Angular na **Vercel** (`frontend/vercel.json` + injeção de `BACKEND_URL` no build via `frontend/scripts/set-env.mjs` + `apiUrlInterceptor` com `withCredentials: true`) comunicando-se cross-origin com o backend Quarkus em **Portainer CE** (container único não-root `appuser` conectado a PostgreSQL externo via dois arquivos dedicados `docker-compose.prod.amd64.yml` — ajustado com `-Xms64m -Xmx220m` para VMs de 1 GB RAM — e `docker-compose.prod.arm64.yml`), com `CORS_ALLOWED_ORIGINS`, `LUMO_FRONTEND_URL` e `LUMO_AUTH_COOKIE_SAME_SITE` validados fail-fast no startup e CI/CD multi-arch (`linux/amd64,linux/arm64`) no GHCR com callback automático de redeploy na API REST do Portainer CE (`.github/workflows/deploy-backend.yml`).
+- **Reason**: Permitir operação imediata em VPS AMD64 enxuta (1 GB RAM) e migração transparente para ARM64, mantendo cookies `HttpOnly` e Google OAuth 2.0 funcionais em cross-origin sem proxy serverless na Vercel.
+- **Trade-off**: Exige configuração alinhada de `CORS_ALLOWED_ORIGINS`, `LUMO_FRONTEND_URL`, `GOOGLE_OAUTH_REDIRECT_URI` e `LUMO_AUTH_COOKIE_SAME_SITE` (`LAX` para subdomínios do mesmo domínio raiz; `NONE` com `Secure=true` para domínios distintos), mitigada por validação fail-fast em `AuthStartupValidator`.
+- **Scope**: Projeto inteiro (`backend/`, `frontend/`, `docker-compose.prod.*.yml`, `.github/workflows/deploy-backend.yml`, `docs/deploy-e-ci-cd.md`, `README.md`).
+- **Date**: 2026-11-28
+- **Status**: active
+
 ## Handoff
 
-- **Feature**: `06-ui-polish-selects-kpis-recurrences`
-- **Phase / Task**: Completed (`T1..T8` concluídas, verificadas e aprovadas pelo usuário em 2026-11-28)
-- **Completed**: `01-lumo-mvp`, `02-ui-ux-overhaul`, `03-zardui-brand-and-shell`, `04-google-oauth-auth`, `05-sidebar-profile-footer`, `06-ui-polish-selects-kpis-recurrences`
+- **Feature**: `07-deploy-vercel-portainer`
+- **Phase / Task**: Completed (T1..T18 implemented, verified, committed and pushed)
+- **Completed**: `01-lumo-mvp`, `02-ui-ux-overhaul`, `03-zardui-brand-and-shell`, `04-google-oauth-auth`, `05-sidebar-profile-footer`, `06-ui-polish-selects-kpis-recurrences`, `07-deploy-vercel-portainer`
 - **In-progress** (file:line): none
-- **Next step**: Pronto para a próxima feature
+- **Next step**: Configurar segredos no GitHub Actions, criar stack no Portainer CE e projeto na Vercel conforme `docs/deploy-e-ci-cd.md`
 - **Blockers**: none
 - **Branch**: main

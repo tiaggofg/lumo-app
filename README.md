@@ -43,6 +43,18 @@ cd frontend && npm test -- --watch=false
 cd frontend && npx playwright test --reporter=list
 ```
 
+## Deploy em Produção (Vercel + Portainer CE)
+
+O Lumo está preparado para deploy contínuo em produção com arquitetura desacoplada:
+
+- **Frontend (Vercel)**: integração Git nativa apontando `Root Directory` para `frontend/`, roteamento SPA via [frontend/vercel.json](frontend/vercel.json) e injeção da variável `BACKEND_URL` no build via [frontend/scripts/set-env.mjs](frontend/scripts/set-env.mjs).
+- **Backend (Portainer CE + PostgreSQL externo)**: imagem multi-arch (`linux/amd64,linux/arm64`) endurecida com usuário não-root (`appuser`) em [backend/Dockerfile](backend/Dockerfile) e dois arquivos Compose prontos para Git Stack:
+  - [docker-compose.prod.amd64.yml](docker-compose.prod.amd64.yml) — otimizado para VPS `amd64` enxutas (ex.: 1 GB RAM, com `-Xms64m -Xmx220m`).
+  - [docker-compose.prod.arm64.yml](docker-compose.prod.arm64.yml) — para VPS `arm64`.
+- **CI/CD Automático**: [.github/workflows/deploy-backend.yml](.github/workflows/deploy-backend.yml) executa `./mvnw verify --batch-mode`, publica a imagem multi-arch no GHCR (`ghcr.io/tiaggofg/lumo-backend`) e dispara o redeploy automático da stack via API REST do Portainer CE.
+
+Consulte o guia completo passo a passo (variáveis de ambiente, Cloudflare Tunnel, Google OAuth, `SameSite` e segredos do GitHub Actions) em [docs/deploy-e-ci-cd.md](docs/deploy-e-ci-cd.md).
+
 ## Documentação Técnica
 
 Consulte o índice completo em [docs/README.md](docs/README.md).
