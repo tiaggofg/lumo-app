@@ -8,6 +8,11 @@ docker compose up -d --build
 ```
 Sobe PostgreSQL 17 (`5432`), Backend Quarkus (`8080`) e Frontend Angular/Nginx (`4200`, configurável via `LUMO_FRONTEND_PORT`).
 
+Para apontar o container `backend` para um PostgreSQL externo (ex.: Neon, Supabase, Aiven) via `.env` na raiz, defina `DB_URL`, `DB_USERNAME` e `DB_PASSWORD` e suba sem o serviço local de banco:
+```bash
+docker compose up -d --no-deps backend frontend
+```
+
 ### Modo Desenvolvimento (Live Reload)
 1. **Banco de Dados**:
    ```bash

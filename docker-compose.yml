@@ -26,9 +26,9 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      DB_URL: jdbc:postgresql://postgres:5432/lumo_db
-      DB_USERNAME: lumo
-      DB_PASSWORD: lumo
+      DB_URL: ${DB_URL:-jdbc:postgresql://postgres:5432/lumo_db}
+      DB_USERNAME: ${DB_USERNAME:-lumo}
+      DB_PASSWORD: ${DB_PASSWORD:-lumo}
       TZ: America/Sao_Paulo
       LUMO_AUTH_JWT_SECRET: ${LUMO_AUTH_JWT_SECRET:-}
       LUMO_AUTH_COOKIE_SECURE: ${LUMO_AUTH_COOKIE_SECURE:-true}
